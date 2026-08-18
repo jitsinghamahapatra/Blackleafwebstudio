@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Basics -->
+    <title>Blackleaf - Buy Professional Websites & Web Design Services</title>
+    <meta name="description"
+        content="Blackleaf offers modern, responsive websites for businesses, startups, and creators. Get high-quality web design at affordable prices.">
+    <meta name="keywords"
+        content="website design, web development, buy website, portfolio website, business website, Blackleaf">
+    <meta name="author" content="Blackleaf Studio">
+
+    <!-- Open Graph (for social media sharing) -->
+    <meta property="og:title" content="Blackleaf - Buy Professional Websites">
+    <meta property="og:description"
+        content="Modern and responsive websites for your business. Affordable and fast delivery.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://Blackleaf.web.app">
+    <meta property="og:image" content="https://Blackleaf.web.app/preview.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/images/Blackleaf.png">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Add FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-logo handwritten"> <a href="index.html">Blackleaf</a></div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html" style="text-decoration: none; color: inherit;">Home</a>
+            <a href="services.html" style="text-decoration: none; color: inherit;">Services</a>
+            <a href="contact.html" style="text-decoration: none; color: inherit;">Contact</a>
+            <a href="admin.html" id="adminNav"
+                style="display: none; text-decoration: none; color: inherit; font-weight: bold;"><i
+                    class="fa-solid fa-lock"></i> Admin</a>
+            <button id="profileBtn" class="btn-request btn-outline" style="display: none; padding: 10px 20px; font-size: 0.8rem;"><i class="fa-solid fa-user"></i> Profile</button>
+            <button id="authBtn" class="btn-request btn-outline"
+                style="padding: 10px 20px; font-size: 0.8rem;">Login</button>
+        </div>
+        <div class="nav-overlay" id="navOverlay"></div>
+    </nav>
+
+    <!-- Inline Profile Section (Hidden by default) -->
+    <section id="profileSection" class="profile-section-inline" style="display: none; background: var(--bg-cream); border-bottom: 2px solid var(--ink-black); padding: 45px 20px;">
+        <div class="profile-card-inline" style="max-width: 480px; margin: 0 auto; border: 2px solid var(--ink-black); padding: 35px; background: white; box-shadow: 10px 10px 0px var(--ink-black); position: relative;">
+            <button type="button" class="modal-close" id="closeProfileBtn"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="margin-top: 0; margin-bottom: 5px; font-family: 'Space Mono', monospace; font-size: 1.6rem; letter-spacing: -1px;">My Profile</h2>
+            <p style="margin-bottom: 25px; opacity: 0.7; font-size: 0.9rem;">Manage your account details directly on page.</p>
+            <form id="profileForm" style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Email Address (Cannot change):</label>
+                    <input type="email" id="profileEmail" class="form-input" readonly disabled style="background-color: #eee; cursor: not-allowed; width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Full Name:</label>
+                    <input type="text" id="profileName" class="form-input" placeholder="Full Name" required style="width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit; background: transparent;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Phone Number:</label>
+                    <input type="text" id="profilePhone" class="form-input" placeholder="Phone Number" required style="width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit; background: transparent;">
+                </div>
+                <div>
+                    <label style="display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Change Password (Leave blank to keep current):</label>
+                    <input type="password" id="profilePassword" class="form-input" placeholder="New Password" style="width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit; background: transparent;">
+                </div>
+                <button type="submit" id="profileSubmitBtn" class="btn-request" style="width: 100%; margin-top: 10px; padding: 12px;">Update Profile</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Click Ripple Container (global) -->
+    <div id="clickRippleContainer"></div>
+
+    <section class="hero anim-fade-up">
+        <div class="hero-content">
+            <span class="hero-price-tag" id="heroPriceTag">Starting at $249</span>
+            <h1 class="hero-title" id="heroTitle">WE BUILD<br>YOUR WEB.</h1>
+            <div class="scribble"></div>
+            <p id="heroDesc" style="margin-bottom: 30px; max-width: 400px; display: inline-block;">
+                Professional, organic, and hand-coded websites for your business.
+                Ready to launch in 1 week.
+            </p>
+            <br>
+            <button id="heroOrderBtn" class="btn-request">Request a Web</button>
+        </div>
+
+        <div class="hero-image">
+            <img src="/images/software-developer-g1372d020e_1280.jpg" id="heroImg" class="random-img-box" alt="Web Design">
+            <div class="offset-border"></div>
+        </div>
+    </section>
+
+    <!-- PHILOSOPHY / WHY US SECTION -->
+    <section class="philosophy-section anim-fade-up">
+        <div class="philosophy-header">
+            <h2>No Bloat. Just Code.</h2>
+            <p>Why custom hand-coded sites beat page builders every time.</p>
+        </div>
+        <div class="philosophy-grid">
+            <div class="philosophy-card card-pink">
+                <i class="fa-solid fa-gauge-high"></i>
+                <h3>Blazing Speed</h3>
+                <p>Custom sites load in under 1 second. Drag-and-drop page builders load megabytes of useless Javascript, killing your SEO and conversion rate.</p>
+            </div>
+            <div class="philosophy-card card-green">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <h3>Bespoke SEO</h3>
+                <p>Clean HTML structure, optimized tags, schema markup, and speed. Google loves custom hand-coded sites far more than bloated templates.</p>
+            </div>
+            <div class="philosophy-card card-cream">
+                <i class="fa-solid fa-code"></i>
+                <h3>100% Custom</h3>
+                <p>No templates, no limits. Every pixel, animation, and feature is crafted precisely to match your unique brand identity and goals.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROCESS SECTION -->
+    <section class="process-section anim-fade-up">
+        <div class="process-header">
+            <h2>How it Works</h2>
+            <p>From initial request to launch in 4 simple steps.</p>
+        </div>
+        <div class="process-timeline">
+            <div class="timeline-step">
+                <div class="step-num">01</div>
+                <h4>Select & Request</h4>
+                <p>Choose a package that fits your project. Press 'Order Now' and log in with Google to fill out your project details.</p>
+            </div>
+            <div class="timeline-step">
+                <div class="step-num">02</div>
+                <h4>Design Draft</h4>
+                <p>We build a high-fidelity Figma blueprint of your website's home page and user experience layout for your review.</p>
+            </div>
+            <div class="timeline-step">
+                <div class="step-num">03</div>
+                <h4>Clean Coding</h4>
+                <p>Once you approve the design blueprint, we code it using modern tools like Vite, Vanilla CSS, and clean Javascript.</p>
+            </div>
+            <div class="timeline-step">
+                <div class="step-num">04</div>
+                <h4>Launch & Handover</h4>
+                <p>We deploy your website to your domain, test performance, transfer source code files, and provide instructions.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="buy" class="pricing-section anim-fade-up">
+        <div class="pricing-header">
+            <h2>Pick Your Package</h2>
+            <p>Choose a style. We build it.</p>
+        </div>
+
+        <div class="packages-grid" id="packagesGrid">
+            <!-- Packages loaded from Firebase only -->
+            <div class="packages-loading" id="packagesLoading">
+                <p style="opacity: 0.6; font-style: italic;">Loading packages...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: RECENT WORKS SLIDER -->
+    <section class="works-section anim-fade-up">
+        <div class="works-header">
+            <h2>Recent Works</h2>
+            <p>Slide by slide magic.</p>
+        </div>
+        <div class="slider-container">
+            <button id="slideLeft" class="slider-btn"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="slider-track" id="projectsSlider">
+                <!-- Dynamic Projects Inserted Here -->
+            </div>
+            <button id="slideRight" class="slider-btn"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="slider-dots" id="sliderDots"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="portfolio.html" class="btn-request" style="display: inline-block; text-decoration: none; padding: 12px 24px;">View All Works</a>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="faq-section anim-fade-up">
+        <div class="faq-header">
+            <h2>Got Questions?</h2>
+            <p>Here are answers to the most common queries we get.</p>
+        </div>
+        <div class="faq-container">
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>What is a hand-coded website?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>It means your site is written line-by-line using pure HTML, CSS, and Javascript. There are no heavy CMS templates (like WordPress or Webflow) or database bloat, giving you unmatched speed, security, and design freedom.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>How long does delivery take?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>For standard single-page sites, delivery is usually 1 week. Larger corporate packages with up to 5 pages take 1.5 weeks, and custom e-commerce packs take 3 weeks.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>Do I own the source code?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes, absolutely. Once the project is complete, you own 100% of the files and code. We transfer all assets to your GitHub repository or send them directly to you.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question">
+                    <span>Where will my website be hosted?</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>We set up hosting on fast, modern, and free platforms (like Vercel, Netlify, or GitHub Pages) depending on your stack. You only pay for your domain name!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="anim-fade-up">
+        <div class="footer-wrapper">
+            <div class="footer-brand">
+                <a href="index.html" class="footer-logo">
+                    Blackleaf <span>★</span>
+                </a>
+                <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.6;">
+                    Professional, organic, and hand-coded websites for your business. Let's make something cool.
+                </p>
+                <small class="copyright">&copy; 2026 Blackleaf Studio. All rights reserved.</small>
+            </div>
+
+            <div class="footer-nav">
+                <div class="footer-col">
+                    <h5>Services</h5>
+                    <a href="#">UI Design</a>
+                    <a href="#">Web Development</a>
+                    <a href="#">Prototyping</a>
+                    <a href="#">Consulting</a>
+                </div>
+
+                <div class="footer-col">
+                    <h5>Navigation</h5>
+                    <a href="index.html">Home</a>
+                    <a href="services.html">Services</a>
+                    <a href="portfolio.html">Portfolio</a>
+                    <a href="contact.html">Contact</a>
+                </div>
+
+                <div class="footer-col">
+                    <h5>Legal</h5>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                    <a href="#">Cookies</a>
+                </div>
+
+                <div class="footer-col">
+                    <h5>Socials</h5>
+                    <a href="https://www.linkedin.com/in/jitsinghamahapatra/" class="social-link" target="_blank">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/jitsinghamahapatra" class="social-link" target="_blank">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                        GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODALS -->
+    <!-- Authentication Modal -->
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" id="closeAuthModal"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="authModalTitle">Log In</h2>
+            <p style="margin-bottom: 20px;">Access your client dashboard.</p>
+            <div class="auth-methods">
+                <button id="googleAuthBtn" class="btn-request"
+                    style="width:100%; background:white; color:var(--ink-black); border:2px solid var(--ink-black); margin-bottom:15px;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                        style="width:20px; vertical-align:middle; margin-right:10px;" alt="Google"> Continue with Google
+                </button>
+                <div style="text-align:center; margin:10px 0; font-weight:bold;">— OR —</div>
+                <input type="email" id="authEmail" class="form-input" placeholder="Email Address">
+                <input type="password" id="authPassword" class="form-input" placeholder="Password">
+                <button id="emailAuthBtn" class="btn-request" style="width:100%;">Login with Email</button>
+                <a href="#" id="forgotPassword" class="forgot-password-link">Forgot Password?</a>
+                <p style="text-align:center; margin-top:15px; font-size:0.8rem; color: #666;">
+                    New user? Sign up by clicking "Continue with Google" above.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complete Registration Modal -->
+    <div id="completeRegModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Complete Sign Up</h2>
+            <p style="margin-bottom: 20px;">Please provide a phone number and password to complete your account registration.</p>
+            <form id="completeRegForm">
+                <label>Email Address:</label>
+                <input type="email" id="regEmail" class="form-input" readonly disabled style="background-color: #eee; cursor: not-allowed;">
+                
+                <label>Full Name:</label>
+                <input type="text" id="regName" class="form-input" placeholder="Full Name" required>
+                
+                <label>Phone Number:</label>
+                <input type="text" id="regPhone" class="form-input" placeholder="Phone Number" required>
+                
+                <label>Password (for future email/pass logins):</label>
+                <input type="password" id="regPassword" class="form-input" placeholder="Password" required>
+                
+                <button type="submit" id="completeRegSubmitBtn" class="btn-request" style="width:100%; margin-top: 15px;">Complete Registration</button>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px;">
+            <button class="modal-close" id="closeOrderModal"><i class="fa-solid fa-xmark"></i></button>
+            <h2>Request a Web</h2>
+            <p style="margin-bottom: 20px;">Tell us about your project.</p>
+            <form id="orderForm">
+                <label>Name:</label>
+                <input type="text" id="orderName" class="form-input" placeholder="Your Name" required>
+
+                <label>Email:</label>
+                <input type="email" id="orderEmail" class="form-input" disabled>
+
+                <label>Select Package:</label>
+                <select id="orderPackage" class="form-input" required>
+                    <!-- Options populated dynamically -->
+                </select>
+                <label>Project Details:</label>
+                <textarea id="orderDetails" class="form-input" rows="4"
+                    placeholder="Describe your business and needs..." required></textarea>
+                <button type="submit" id="submitOrderBtn" class="btn-request" style="width:100%;">Submit
+                    Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Logic -->
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>

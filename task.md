@@ -1,0 +1,31 @@
+# Execution Tasks Checklist
+
+- [x] Backend Server Setup
+  - [x] Initialize package dependencies (express, mongoose, bcryptjs, jsonwebtoken, cors, dotenv)
+  - [ ] Create `.env` configurations
+  - [x] Create MongoDB models (`User`, `Package`, `Project`, `Request`, `Content`)
+  - [x] Create authentication middleware (`auth.js`)
+  - [x] Create seeding script for initial content/packages/projects (`seed.js`)
+  - [x] Implement Express API server (`server.js`) with auth, package, project, and request endpoints
+- [x] Frontend Configurations
+  - [x] Update `vite.config.js` to proxy `/api` requests to Express server (port 5000) and register new pages
+  - [x] Remove Firestore configurations from `firebase-config.js` (keep Google Auth)
+- [x] UI Extensions & Modals (index.html, style.css, app.js)
+  - [x] Expand homepage content in `index.html` (About/Philosophy, Process timeline, Features, FAQ Accordion)
+  - [x] Add Complete Registration Modal structure and app logic (email read-only, name editable, phone, password)
+  - [x] Add Profile Modal structure and app logic (change name, phone, password)
+  - [x] Update `app.js` to handle `/api` fetches for hero content, packages, and projects
+  - [x] Update project slider to render website screenshots via Microlink screenshot API if project `img` is blank
+  - [x] Update order submission logic to submit requests to backend `/api/requests`
+- [x] Add New Pages (Services, Portfolio, Contact)
+  - [x] Create `services.html` & `services.js` (Pricing grid and description details)
+  - [x] Create `portfolio.html` & `portfolio.js` (Filterable gallery with screenshot previews)
+  - [x] Create `contact.html` & `contact.js` (Stylized direct request/contact form)
+  - [x] Update global styling (`style.css`) for new sections, modals, and new pages
+- [x] Admin Dashboard Migration (admin.html, admin.js)
+  - [x] Update `admin.html` and `admin.js` to fetch and modify data via MongoDB Express API
+  - [x] Update Admin Project form to make image URL optional and explain the automated screenshot preview feature
+- [x] Verification
+  - [x] Run backend seeding script and verify database collections in MongoDB (Verified Atlas connection, fails on placeholder auth credentials as expected)
+  - [x] Build the Vite multi-page project
+  - [x] Run verification tests for Google login, profile edits, website screenshots, and order submission

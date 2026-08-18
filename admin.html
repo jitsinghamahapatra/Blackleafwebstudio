@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackleaf - Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="nav-logo handwritten">Blackleaf <span style="font-size:1rem; font-family:'Space Mono', monospace;">ADMIN</span></div>
+        <div class="admin-nav-right">
+            <a href="index.html" class="admin-nav-link"><i class="fa-solid fa-arrow-left"></i> Live Site</a>
+            <button id="adminLogout" class="btn-request btn-outline" style="color: white; border-color: white; padding: 8px 16px; font-size: 0.8rem;">Logout</button>
+        </div>
+    </nav>
+
+    <div class="admin-container" style="display: none;" id="adminPanelWrapper">
+        <!-- Mobile Tab Bar -->
+        <div class="mobile-tab-bar" id="mobileTabBar">
+            <button class="mobile-tab active" data-target="tab-orders"><i class="fa-solid fa-inbox"></i><span>Requests</span></button>
+            <button class="mobile-tab" data-target="tab-content"><i class="fa-solid fa-pen-to-square"></i><span>Hero</span></button>
+            <button class="mobile-tab" data-target="tab-packages"><i class="fa-solid fa-tags"></i><span>Packages</span></button>
+            <button class="mobile-tab" data-target="tab-projects"><i class="fa-solid fa-image"></i><span>Works</span></button>
+        </div>
+
+        <aside class="sidebar">
+            <ul class="nav-list">
+                <li class="nav-item active" data-target="tab-orders"><i class="fa-solid fa-inbox"></i> Web Requests</li>
+                <li class="nav-item" data-target="tab-content"><i class="fa-solid fa-pen-to-square"></i> Hero Content</li>
+                <li class="nav-item" data-target="tab-packages"><i class="fa-solid fa-tags"></i> Pricing Packages</li>
+                <li class="nav-item" data-target="tab-projects"><i class="fa-solid fa-image"></i> Recent Works</li>
+            </ul>
+        </aside>
+
+        <main class="admin-content">
+            <!-- ORDERS TAB -->
+            <section id="tab-orders" class="tab-pane active">
+                <h2>Web Requests</h2>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Email</th>
+                                <th>Package</th>
+                                <th>Details</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Mobile Cards for Orders -->
+                <div class="mobile-orders-list" id="mobileOrdersList">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- HERO CONTENT TAB -->
+            <section id="tab-content" class="tab-pane">
+                <h2>Hero Content</h2>
+                <form id="heroForm" class="admin-form">
+                    <label>Price Tag Text</label>
+                    <input type="text" id="adminHeroPrice" class="form-input" placeholder="e.g. Starting at $249">
+                    
+                    <label>Hero Title (HTML allowed like &lt;br&gt;)</label>
+                    <input type="text" id="adminHeroTitle" class="form-input" placeholder="WE BUILD<br>YOUR WEB.">
+                    
+                    <label>Hero Description</label>
+                    <textarea id="adminHeroDesc" class="form-input" rows="3"></textarea>
+                    
+                    <label>Hero Image URL</label>
+                    <input type="text" id="adminHeroImg" class="form-input" placeholder="/images/image.png">
+                    
+                    <button type="submit" class="btn-request">Save Content</button>
+                </form>
+            </section>
+
+            <!-- PACKAGES TAB -->
+            <section id="tab-packages" class="tab-pane">
+                <h2>Pricing Packages</h2>
+                <form id="addPackageForm" class="admin-form pkg-form-wrapper">
+                    <h3 id="pkgFormTitle">Add New Package</h3>
+                    <input type="text" id="pkgId" class="form-input" placeholder="ID (e.g. 1, 2, 3)" required>
+                    <input type="text" id="pkgName" class="form-input" placeholder="Package Name" required>
+                    <input type="text" id="pkgPrice" class="form-input" placeholder="Price (e.g. $249)" required>
+                    <input type="text" id="pkgImg" class="form-input" placeholder="Image URL">
+                    <textarea id="pkgFeatures" class="form-input" rows="3" placeholder="Comma separated features"></textarea>
+                    <div class="form-actions">
+                        <button type="submit" id="pkgSubmitBtn" class="btn-request">Save Package</button>
+                        <button type="button" id="pkgCancelEdit" class="btn-request btn-outline" style="display:none;">Cancel</button>
+                    </div>
+                </form>
+                
+                <div id="packagesList" class="cards-grid">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- PROJECTS TAB -->
+            <section id="tab-projects" class="tab-pane">
+                <h2>Recent Works Slider</h2>
+                <form id="addProjectForm" class="admin-form proj-form-wrapper">
+                    <h3 id="projFormTitle">Add New Project</h3>
+                    <input type="text" id="projTitle" class="form-input" placeholder="Project Title" required>
+                    <textarea id="projDesc" class="form-input" rows="2" placeholder="Project Description (Optional)"></textarea>
+                    <input type="text" id="projImg" class="form-input" placeholder="Image URL (Optional - auto-fetches website screenshot if blank)">
+                    <input type="text" id="projLink" class="form-input" placeholder="Project URL (e.g. https://...)" required>
+                    <div class="form-actions">
+                        <button type="submit" id="projSubmitBtn" class="btn-request">Add Project</button>
+                        <button type="button" id="projCancelEdit" class="btn-request btn-outline" style="display:none;">Cancel</button>
+                    </div>
+                </form>
+                
+                <div id="projectsList" class="cards-grid">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="adminLoginPrompt" style="text-align:center; padding: 100px;">
+        <h2>Checking Admin Access...</h2>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
