@@ -78,6 +78,7 @@ async function checkAdminAccess() {
             loadHeroContent();
             loadPackagesAdmin();
             loadProjectsAdmin();
+            loadMessagesAdmin();
         } else {
             redirectToLiveSite();
         }
@@ -583,6 +584,185 @@ async function deleteProject(id) {
             window.customAlert("Error deleting project", true);
         }
     }
+}
+
+
+// ==========================================
+// MESSAGES & CONVERSATIONS LOGIC
+// ==========================================
+const messagesTableBody = document.getElementById("messagesTableBody");
+const replyMessageModal = document.getElementById("replyMessageModal");
+const closeReplyMessageModal = document.getElementById("closeReplyMessageModal");
+const replyModalThreadHistory = document.getElementById("replyModalThreadHistory");
+const adminReplyForm = document.getElementById("adminReplyForm");
+const adminReplyText = document.getElementById("adminReplyText");
+const replyMessageId = document.getElementById("replyMessageId");
+const replyModalHeader = document.getElementById("replyModalHeader");
+
+let currentActiveMessage = null;
+
+async function loadMessagesAdmin() {
+    if (!token) return;
+    try {
+        const res = await fetch("/api/messages", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const messages = await res.json();
+        renderMessagesAdmin(messages);
+    } catch (err) {
+        console.error("Error loading admin messages", err);
+    }
+}
+
+function renderMessagesAdmin(messages) {
+    if (!messagesTableBody) return;
+    if (!messages || messages.length === 0) {
+        messagesTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; opacity:0.6;">No messages found.</td></tr>`;
+        return;
+    }
+
+    messagesTableBody.innerHTML = messages.map(msg => {
+        const dateStr = new Date(msg.timestamp).toLocaleDateString();
+        const isReplied = msg.status === "Replied";
+        const badgeBg = isReplied ? "#e1ffd4" : "#ffe4cc";
+        
+        // Pulse unread badge if message is open or readByAdmin is false
+        const unreadLabel = !msg.readByAdmin ? `<span style="display:inline-block; width:8px; height:8px; background:#ff0055; border-radius:50%; margin-right:8px;" title="Unread Message"></span>` : "";
+
+        return `
+            <tr>
+                <td>${dateStr}</td>
+                <td style="font-weight:bold; display: flex; align-items: center; border: none; padding-top: 15px;">${unreadLabel}${msg.name}</td>
+                <td>${msg.email}</td>
+                <td>${msg.subject}</td>
+                <td><span class="status-badge" style="background:${badgeBg}; padding:2px 8px; border:1px solid var(--ink-black); font-weight:bold; font-size:0.75rem; text-transform:uppercase;">${msg.status}</span></td>
+                <td>
+                    <button class="btn-request btn-reply-message" data-id="${msg._id}" style="padding:4px 10px; font-size:0.75rem; cursor:pointer;">View / Reply</button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+    // Wire up reply buttons
+    messagesTableBody.querySelectorAll(".btn-reply-message").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const msgId = btn.dataset.id;
+            openReplyModal(msgId);
+        });
+    });
+}
+
+async function openReplyModal(msgId) {
+    if (!token) return;
+    try {
+        const res = await fetch("/api/messages", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const messages = await res.json();
+        const msg = messages.find(m => m._id === msgId);
+        if (!msg) return;
+
+        currentActiveMessage = msg;
+        replyMessageId.value = msg._id;
+        replyModalHeader.innerHTML = `Conversation thread with <strong>${msg.name}</strong> (${msg.email})`;
+        adminReplyText.value = "";
+        
+        // Render thread history
+        renderThreadHistory(msg);
+        
+        // Open Modal
+        replyMessageModal.classList.add("active");
+
+        // Mark as read by admin if unread
+        if (!msg.readByAdmin) {
+            await fetch(`/api/messages/${msg._id}/read`, {
+                method: "PUT",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            loadMessagesAdmin(); // Refresh unread count indicator list
+        }
+    } catch (e) {
+        console.error("Failed to open reply modal", e);
+    }
+}
+
+function renderThreadHistory(msg) {
+    if (!replyModalThreadHistory) return;
+    
+    let historyHtml = `
+        <div style="padding-bottom:10px; border-bottom:1px dashed #ccc; margin-bottom:10px;">
+            <small style="font-weight:bold; color:var(--ink-black);">${msg.name} (Client):</small>
+            <p style="font-size:0.85rem; margin:2px 0; color:var(--ink-black); font-weight:bold;">${msg.message}</p>
+            <small style="opacity:0.6; font-size:0.7rem;">${new Date(msg.timestamp).toLocaleString()}</small>
+        </div>
+    `;
+
+    if (msg.replies && msg.replies.length > 0) {
+        historyHtml += msg.replies.map(reply => {
+            const isAdmin = reply.sender === "admin";
+            const senderLabel = isAdmin ? "You (Admin)" : `${msg.name} (Client)`;
+            const labelColor = isAdmin ? "#ff0055" : "#0066ff";
+            return `
+                <div style="padding-left:10px; border-left:2px solid ${labelColor}; margin-bottom:10px;">
+                    <small style="font-weight:bold; color:${labelColor};">${senderLabel}:</small>
+                    <p style="font-size:0.85rem; margin:2px 0; color:var(--ink-black);">${reply.text}</p>
+                    <small style="opacity:0.6; font-size:0.7rem;">${new Date(reply.timestamp).toLocaleString()}</small>
+                </div>
+            `;
+        }).join("");
+    } else {
+        historyHtml += `<p style="font-size:0.8rem; opacity:0.6; font-style:italic; text-align:center;">No responses sent yet.</p>`;
+    }
+
+    replyModalThreadHistory.innerHTML = historyHtml;
+    // Auto scroll to bottom
+    replyModalThreadHistory.scrollTop = replyModalThreadHistory.scrollHeight;
+}
+
+// Close Modal Event
+if (closeReplyMessageModal) {
+    closeReplyMessageModal.addEventListener("click", () => {
+        replyMessageModal.classList.remove("active");
+        currentActiveMessage = null;
+    });
+}
+
+// Admin Reply Form Submission
+if (adminReplyForm) {
+    adminReplyForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msgId = replyMessageId.value;
+        const text = adminReplyText.value;
+        if (!token || !msgId || !text) return;
+
+        try {
+            const res = await fetch(`/api/messages/${msgId}/reply`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ text })
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                window.customAlert("Reply sent successfully!");
+                adminReplyText.value = "";
+                
+                // Refresh modal history
+                currentActiveMessage = data.message;
+                renderThreadHistory(currentActiveMessage);
+                
+                // Reload messages list
+                loadMessagesAdmin();
+            } else {
+                window.customAlert(data.message || "Failed to send reply", true);
+            }
+        } catch (err) {
+            window.customAlert("Error sending reply", true);
+        }
+    });
 }
 
 

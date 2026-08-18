@@ -24,7 +24,10 @@
             <a href="admin.html" id="adminNav"
                 style="display: none; text-decoration: none; color: inherit; font-weight: bold;"><i
                     class="fa-solid fa-lock"></i> Admin</a>
-            <a href="profile.html" id="profileBtn" class="btn-request btn-outline" style="display: none; text-decoration: none; padding: 10px 20px; font-size: 0.8rem; font-weight: bold;"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="profile.html" id="profileBtn" class="btn-request btn-outline" style="display: none; text-decoration: none; padding: 10px 20px; font-size: 0.8rem; font-weight: bold; position: relative;">
+                <i class="fa-solid fa-user"></i> Profile
+                <span id="profileBadge" style="display: none; position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; background-color: #ff0055; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px #ff0055; animation: pulse-badge 1.5s infinite;"></span>
+            </a>
             <button id="authBtn" class="btn-request btn-outline"
                 style="padding: 10px 20px; font-size: 0.8rem;">Login</button>
         </div>

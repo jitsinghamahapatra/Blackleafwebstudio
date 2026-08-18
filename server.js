@@ -12,6 +12,7 @@ import Package from './server/models/Package.js';
 import Project from './server/models/Project.js';
 import Request from './server/models/Request.js';
 import Content from './server/models/Content.js';
+import Message from './server/models/Message.js';
 
 // Middleware
 import { auth, admin } from './server/middleware/auth.js';
@@ -401,6 +402,155 @@ app.delete('/api/orders/:id', auth, admin, async (req, res) => {
     res.json({ message: 'Order deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Server error deleting order' });
+  }
+});
+
+// GET /api/orders/my -> fetch logged-in user's requests
+app.get('/api/orders/my', auth, async (req, res) => {
+  try {
+    const requests = await Request.find({ uid: req.user.id }).sort({ timestamp: -1 });
+    res.json(requests);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error fetching your orders' });
+  }
+});
+
+// ==========================================
+// MESSAGES ROUTES
+// ==========================================
+
+// POST /api/messages -> Submit a new message (authenticate optionally)
+app.post('/api/messages', async (req, res) => {
+  const { name, email, subject, message } = req.body;
+  
+  // Extract user if logged in
+  let uid = null;
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+      uid = decoded.id;
+    } catch (e) {
+      // Allow continuing as guest if token is invalid or expired
+    }
+  }
+
+  try {
+    const newMessage = new Message({
+      uid,
+      name,
+      email: email.toLowerCase(),
+      subject,
+      message,
+      readByAdmin: false,
+      readByUser: true
+    });
+    await newMessage.save();
+    res.json({ success: true, message: newMessage });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error sending message' });
+  }
+});
+
+// GET /api/messages -> Get all messages (Admin only)
+app.get('/api/messages', auth, admin, async (req, res) => {
+  try {
+    const messages = await Message.find().sort({ timestamp: -1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error fetching messages' });
+  }
+});
+
+// GET /api/messages/my -> Get logged-in user's messages
+app.get('/api/messages/my', auth, async (req, res) => {
+  try {
+    const messages = await Message.find({ uid: req.user.id }).sort({ timestamp: -1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error fetching your messages' });
+  }
+});
+
+// GET /api/messages/unread-count -> Get count of unread replies
+app.get('/api/messages/unread-count', auth, async (req, res) => {
+  try {
+    const unreadCount = await Message.countDocuments({ uid: req.user.id, readByUser: false });
+    res.json({ unreadCount });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error checking unread messages' });
+  }
+});
+
+// POST /api/messages/:id/reply -> Reply to a message (Auth user, Admin or Owner)
+app.post('/api/messages/:id/reply', auth, async (req, res) => {
+  const { text } = req.body;
+  if (!text) {
+    return res.status(400).json({ message: 'Reply text is required' });
+  }
+
+  try {
+    const msg = await Message.findById(req.params.id);
+    if (!msg) {
+      return res.status(404).json({ message: 'Message thread not found' });
+    }
+
+    const isAdmin = req.user.role === 'admin';
+    const isOwner = msg.uid === req.user.id;
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ message: 'Not authorized to reply to this thread' });
+    }
+
+    const reply = {
+      sender: isAdmin ? 'admin' : 'user',
+      senderName: req.user.name || (isAdmin ? 'Admin' : 'Client'),
+      text,
+      timestamp: new Date()
+    };
+
+    msg.replies.push(reply);
+    
+    if (isAdmin) {
+      msg.status = 'Replied';
+      msg.readByUser = false; // Trigger alert/badge for user
+    } else {
+      msg.status = 'Open';
+      msg.readByAdmin = false; // Trigger notification alert for admin
+    }
+
+    // Mark as read by the person who replied
+    if (isAdmin) {
+      msg.readByAdmin = true;
+    } else {
+      msg.readByUser = true;
+    }
+
+    await msg.save();
+    res.json({ success: true, message: msg });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error posting reply' });
+  }
+});
+
+// PUT /api/messages/:id/read -> Mark messages as read by user or admin
+app.put('/api/messages/:id/read', auth, async (req, res) => {
+  try {
+    const msg = await Message.findById(req.params.id);
+    if (!msg) return res.status(404).json({ message: 'Message not found' });
+    
+    if (req.user.role === 'admin') {
+      msg.readByAdmin = true;
+    } else if (msg.uid === req.user.id) {
+      msg.readByUser = true;
+    }
+    
+    await msg.save();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error marking read' });
   }
 });
 

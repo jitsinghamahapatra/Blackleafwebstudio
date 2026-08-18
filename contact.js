@@ -126,10 +126,33 @@ function updateUIState() {
         // Auto-fill contact form if empty
         if (contactFormName && !contactFormName.value) contactFormName.value = currentUser.name;
         if (contactFormEmail && !contactFormEmail.value) contactFormEmail.value = currentUser.email;
+        
+        checkUnreadMessages();
     } else {
         if (authBtn) authBtn.textContent = "Login";
         if (profileBtn) profileBtn.style.display = "none";
         if (adminNav) adminNav.style.display = "none";
+        const badge = document.getElementById("profileBadge");
+        if (badge) badge.style.display = "none";
+    }
+}
+
+async function checkUnreadMessages() {
+    if (!currentUser) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    
+    try {
+        const res = await fetch("/api/messages/unread-count", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const badge = document.getElementById("profileBadge");
+        if (badge) {
+            badge.style.display = data.unreadCount > 0 ? "block" : "none";
+        }
+    } catch (e) {
+        console.error("Failed to check unread messages", e);
     }
 }
 
@@ -297,23 +320,45 @@ if (emailAuthBtn) {
 // CONTACT FORM SUBMISSION
 // ==========================================
 if (contactForm) {
-    contactForm.addEventListener("submit", (e) => {
+    contactForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         
         const submitBtn = document.getElementById("contactSubmitBtn");
         submitBtn.textContent = "Sending...";
         
-        setTimeout(() => {
-            window.customAlert("Message sent successfully! We will get back to you shortly.");
-            contactForm.reset();
+        const token = localStorage.getItem("token");
+        const headers = { "Content-Type": "application/json" };
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        try {
+            const res = await fetch("/api/messages", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    name: contactFormName.value,
+                    email: contactFormEmail.value,
+                    subject: contactFormSubject.value,
+                    message: contactFormMessage.value
+                })
+            });
+            const data = await res.json();
             
-            // Re-fill name and email if logged in
-            if (currentUser) {
-                contactFormName.value = currentUser.name;
-                contactFormEmail.value = currentUser.email;
+            if (res.ok && data.success) {
+                window.customAlert("Message sent successfully! We will get back to you shortly.");
+                contactForm.reset();
+                if (currentUser) {
+                    contactFormName.value = currentUser.name;
+                    contactFormEmail.value = currentUser.email;
+                }
+            } else {
+                window.customAlert(data.message || "Failed to send message", true);
             }
-            submitBtn.textContent = "Send Message";
-        }, 1200);
+        } catch (err) {
+            window.customAlert("Error sending message. Please try again later.", true);
+        }
+        submitBtn.textContent = "Send Message";
     });
 }
 

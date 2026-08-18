@@ -197,11 +197,47 @@ function updateUIState() {
         if (adminNav) {
             adminNav.style.display = currentUser.role === 'admin' ? "inline-block" : "none";
         }
+        checkUnreadMessages();
     } else {
         if (authBtn) authBtn.textContent = "Login";
         if (profileBtn) profileBtn.style.display = "none";
         if (adminNav) adminNav.style.display = "none";
+        const badge = document.getElementById("profileBadge");
+        if (badge) badge.style.display = "none";
+        const banner = document.getElementById("unreadNotificationBanner");
+        if (banner) banner.style.display = "none";
     }
+}
+
+async function checkUnreadMessages() {
+    if (!currentUser) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    
+    try {
+        const res = await fetch("/api/messages/unread-count", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const badge = document.getElementById("profileBadge");
+        if (badge) {
+            badge.style.display = data.unreadCount > 0 ? "block" : "none";
+        }
+        const banner = document.getElementById("unreadNotificationBanner");
+        if (banner) {
+            banner.style.display = data.unreadCount > 0 ? "block" : "none";
+        }
+    } catch (e) {
+        console.error("Failed to check unread messages", e);
+    }
+}
+
+const closeUnreadBanner = document.getElementById("closeUnreadBanner");
+if (closeUnreadBanner) {
+    closeUnreadBanner.addEventListener("click", () => {
+        const banner = document.getElementById("unreadNotificationBanner");
+        if (banner) banner.style.display = "none";
+    });
 }
 
 // RESTORE USER SESSION
@@ -665,9 +701,19 @@ if (orderForm) {
             const data = await res.json();
 
             if (res.ok) {
-                window.customAlert("Web request submitted successfully! We will contact you soon.");
+                window.customAlert("Web request submitted successfully! Auto-downloading invoice...");
                 closeModal(orderModal);
                 orderForm.reset();
+                
+                // Set price based on selected package
+                let price = "Contact Us";
+                if (data.package.toLowerCase().includes("starter")) price = "$249";
+                else if (data.package.toLowerCase().includes("growth")) price = "$499";
+                else if (data.package.toLowerCase().includes("creative") || data.package.toLowerCase().includes("elite")) price = "$999";
+                
+                if (window.downloadInvoicePDF) {
+                    window.downloadInvoicePDF(data, price);
+                }
             } else {
                 window.customAlert(data.message || "Failed to submit request", true);
             }

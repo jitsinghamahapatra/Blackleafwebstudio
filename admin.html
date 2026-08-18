@@ -25,6 +25,7 @@
             <button class="mobile-tab" data-target="tab-content"><i class="fa-solid fa-pen-to-square"></i><span>Hero</span></button>
             <button class="mobile-tab" data-target="tab-packages"><i class="fa-solid fa-tags"></i><span>Packages</span></button>
             <button class="mobile-tab" data-target="tab-projects"><i class="fa-solid fa-image"></i><span>Works</span></button>
+            <button class="mobile-tab" data-target="tab-messages"><i class="fa-solid fa-envelope"></i><span>Messages</span></button>
         </div>
 
         <aside class="sidebar">
@@ -33,6 +34,7 @@
                 <li class="nav-item" data-target="tab-content"><i class="fa-solid fa-pen-to-square"></i> Hero Content</li>
                 <li class="nav-item" data-target="tab-packages"><i class="fa-solid fa-tags"></i> Pricing Packages</li>
                 <li class="nav-item" data-target="tab-projects"><i class="fa-solid fa-image"></i> Recent Works</li>
+                <li class="nav-item" data-target="tab-messages"><i class="fa-solid fa-envelope"></i> Contact Messages</li>
             </ul>
         </aside>
 
@@ -123,7 +125,49 @@
                     <!-- Populated dynamically -->
                 </div>
             </section>
+
+            <!-- MESSAGES TAB -->
+            <section id="tab-messages" class="tab-pane">
+                <h2>Contact Messages</h2>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messagesTableBody">
+                            <!-- Dynamic Messages Loaded Here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </main>
+    </div>
+
+    <!-- Reply Message Modal -->
+    <div id="replyMessageModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 600px;">
+            <button class="modal-close" id="closeReplyMessageModal"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="font-family: 'Space Mono', monospace; font-size: 1.6rem; margin-top:0;">Conversation Thread</h2>
+            <p style="margin-bottom: 20px; opacity:0.8;" id="replyModalHeader">Conversation history with User</p>
+            
+            <div id="replyModalThreadHistory" style="max-height: 250px; overflow-y: auto; background: #f8f8f8; border: 2px solid var(--ink-black); padding: 15px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <!-- Full thread conversation displays here -->
+            </div>
+            
+            <form id="adminReplyForm">
+                <input type="hidden" id="replyMessageId">
+                <label style="display:block; font-weight:bold; margin-bottom:6px;">Your Reply:</label>
+                <textarea id="adminReplyText" class="form-input" rows="4" placeholder="Type your reply to the user..." required style="width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit; resize: vertical; margin-bottom: 15px; background: transparent;"></textarea>
+                <button type="submit" class="btn-request" style="width:100%;">Send Reply</button>
+            </form>
+        </div>
     </div>
 
     <div id="adminLoginPrompt" style="text-align:center; padding: 100px;">

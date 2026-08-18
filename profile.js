@@ -120,10 +120,13 @@ function updateUIState() {
         if (adminNav) {
             adminNav.style.display = currentUser.role === 'admin' ? "inline-block" : "none";
         }
+        checkUnreadMessages();
     } else {
         if (authBtn) authBtn.textContent = "Login";
         if (profileBtn) profileBtn.style.display = "none";
         if (adminNav) adminNav.style.display = "none";
+        const badge = document.getElementById("profileBadge");
+        if (badge) badge.style.display = "none";
     }
 }
 
@@ -148,6 +151,9 @@ async function restoreSession() {
             profileEmail.value = currentUser.email;
             profileName.value = currentUser.name;
             profilePhone.value = currentUser.phone || "";
+            
+            // Load dashboard data
+            loadDashboardData();
         } else {
             localStorage.removeItem("token");
             window.location.href = "index.html";
@@ -257,6 +263,229 @@ if (profileForm) {
             window.customAlert("Error connecting to server", true);
         }
     });
+}
+
+// ==========================================
+// DASHBOARD LOGS RETRIEVAL & RENDERING
+// ==========================================
+async function loadDashboardData() {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+        // 1. Fetch Requests History
+        const reqRes = await fetch("/api/orders/my", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const requests = await reqRes.json();
+        renderRequestsList(requests);
+        
+        // 2. Fetch Messages Inbox
+        const msgRes = await fetch("/api/messages/my", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const messages = await msgRes.json();
+        renderMessagesList(messages);
+    } catch (e) {
+        console.error("Failed to load dashboard data", e);
+    }
+}
+
+function renderRequestsList(requests) {
+    const list = document.getElementById("requestsList");
+    if (!list) return;
+
+    if (!requests || requests.length === 0) {
+        list.innerHTML = `<p style="opacity: 0.6; font-style: italic; margin-top: 10px;">No project requests placed yet.</p>`;
+        return;
+    }
+
+    list.innerHTML = requests.map(req => {
+        const isCompleted = req.status === "Completed";
+        const badgeBg = isCompleted ? "#e1ffd4" : "#ffe4cc";
+        const dateStr = new Date(req.timestamp).toLocaleDateString();
+        
+        // Match package price
+        let price = "Contact Us";
+        if (req.package.toLowerCase().includes("starter")) price = "$249";
+        else if (req.package.toLowerCase().includes("growth")) price = "$499";
+        else if (req.package.toLowerCase().includes("creative") || req.package.toLowerCase().includes("elite")) price = "$999";
+
+        return `
+            <div class="request-card" style="border: 2px solid var(--ink-black); padding: 15px; background: var(--bg-cream); box-shadow: 4px 4px 0 var(--ink-black); margin-bottom: 5px; display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center;">
+                    <strong style="font-size: 1.1rem; font-family: 'Space Mono', monospace;">${req.package}</strong>
+                    <span style="font-size: 0.8rem; background: ${badgeBg}; border: 1px solid var(--ink-black); padding: 2px 8px; font-weight: bold; text-transform: uppercase;">${req.status}</span>
+                </div>
+                <p style="font-size: 0.85rem; margin-bottom: 12px; color: var(--ink-black);"><strong>Details:</strong> ${req.details}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; opacity: 0.8; flex-wrap: wrap; gap: 10px; border-top: 1px dashed #bbb; padding-top: 10px; margin-top: auto;">
+                    <span>Date: ${dateStr}</span>
+                    <button class="btn-request btn-download-invoice" data-id="${req._id}" data-package="${req.package}" data-price="${price}" data-details="${req.details.replace(/"/g, '&quot;')}" data-name="${req.name.replace(/"/g, '&quot;')}" data-email="${req.email}" data-timestamp="${req.timestamp}" style="padding: 5px 12px; font-size: 0.75rem; cursor: pointer; display: inline-block;">Download Invoice</button>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    // Wire up download buttons
+    list.querySelectorAll(".btn-download-invoice").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const req = {
+                _id: btn.dataset.id,
+                package: btn.dataset.package,
+                details: btn.dataset.details,
+                name: btn.dataset.name,
+                email: btn.dataset.email,
+                timestamp: btn.dataset.timestamp
+            };
+            const price = btn.dataset.price;
+            if (window.downloadInvoicePDF) {
+                window.downloadInvoicePDF(req, price);
+            }
+        });
+    });
+}
+
+function renderMessagesList(messages) {
+    const list = document.getElementById("messagesList");
+    if (!list) return;
+
+    if (!messages || messages.length === 0) {
+        list.innerHTML = `<p style="opacity: 0.6; font-style: italic; margin-top: 10px;">No support messages sent yet.</p>`;
+        return;
+    }
+
+    list.innerHTML = messages.map(msg => {
+        const isReplied = msg.status === "Replied";
+        const badgeBg = isReplied ? "#e1ffd4" : "#ffe4cc";
+        
+        // Render thread replies
+        const repliesHtml = msg.replies && msg.replies.length > 0
+            ? msg.replies.map(reply => {
+                const isUser = reply.sender === "user";
+                const senderLabel = isUser ? "You" : "Admin";
+                const labelColor = isUser ? "#0066ff" : "#ff0055";
+                const replyDate = new Date(reply.timestamp).toLocaleString();
+                return `
+                    <div style="padding-left: 10px; border-left: 2px solid ${labelColor}; margin-bottom: 8px;">
+                        <small style="font-weight: bold; color: ${labelColor};">${senderLabel}:</small>
+                        <p style="font-size: 0.85rem; margin: 2px 0; color: var(--ink-black);">${reply.text}</p>
+                        <small style="opacity: 0.6; font-size: 0.7rem;">${replyDate}</small>
+                    </div>
+                `;
+              }).join("")
+            : `<p style="font-size: 0.8rem; opacity: 0.6; font-style: italic; margin: 5px 0;">No responses yet from the admin team.</p>`;
+
+        // Unread check dot
+        const unreadIndicator = !msg.readByUser 
+            ? `<span style="display:inline-block; width:8px; height:8px; background-color:#ff0055; border-radius:50%; margin-right:8px;" title="Unread Reply"></span>` 
+            : "";
+
+        return `
+            <div class="message-card" data-id="${msg._id}" style="border: 2px solid var(--ink-black); padding: 15px; background: white; box-shadow: 4px 4px 0 var(--ink-black); margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center;">
+                        ${unreadIndicator}
+                        <strong style="font-size: 1rem; color: var(--ink-black);">Subject: ${msg.subject}</strong>
+                    </div>
+                    <span style="font-size: 0.75rem; background: ${badgeBg}; border: 1px solid var(--ink-black); padding: 2px 8px; font-weight: bold;">${msg.status}</span>
+                </div>
+                <p style="font-size: 0.85rem; margin-bottom: 10px; background: #fafafa; border: 1px dashed #ccc; padding: 10px; color: var(--ink-black);">
+                    <strong>Original query:</strong><br>${msg.message}
+                </p>
+                
+                <!-- Expanded Conversation Thread -->
+                <div class="conversation-thread" style="background: #fdfdfd; border-top: 1px solid #ddd; padding: 10px 0 0 0; margin-top: 10px; display: flex; flex-direction: column; gap: 5px;">
+                    <strong style="font-size: 0.85rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">Thread History:</strong>
+                    ${repliesHtml}
+                </div>
+                
+                <!-- Reply Box Form -->
+                <form class="thread-reply-form" data-id="${msg._id}" style="display: flex; gap: 8px; margin-top: 15px;">
+                    <input type="text" placeholder="Type your reply to admin..." required style="flex: 1; border: 2px solid var(--ink-black); padding: 6px 12px; font-size: 0.85rem; font-family: inherit; background: white;">
+                    <button type="submit" class="btn-request" style="padding: 6px 15px; font-size: 0.8rem; cursor: pointer;">Reply</button>
+                </form>
+            </div>
+        `;
+    }).join("");
+
+    // Wire up quick reply submission & read-status trigger on click
+    list.querySelectorAll(".message-card").forEach(card => {
+        const id = card.dataset.id;
+        
+        // Mark as read when clicked/interacted
+        card.addEventListener("click", async () => {
+            const dot = card.querySelector("span[title='Unread Reply']");
+            if (dot) {
+                try {
+                    const token = localStorage.getItem("token");
+                    const res = await fetch(`/api/messages/${id}/read`, {
+                        method: "PUT",
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        dot.remove();
+                        // Trigger count badge updates in header
+                        restoreSession();
+                    }
+                } catch (e) {}
+            }
+        });
+
+        // Form reply submission
+        const form = card.querySelector(".thread-reply-form");
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const input = form.querySelector("input");
+            const text = input.value;
+            const submitBtn = form.querySelector("button[type='submit']");
+            submitBtn.textContent = "...";
+            submitBtn.disabled = true;
+
+            const token = localStorage.getItem("token");
+            try {
+                const res = await fetch(`/api/messages/${id}/reply`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ text })
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    window.customAlert("Reply sent!");
+                    loadDashboardData(); // Reload list
+                } else {
+                    window.customAlert(data.message || "Failed to send reply", true);
+                }
+            } catch (err) {
+                window.customAlert("Connection error", true);
+            }
+            submitBtn.textContent = "Reply";
+            submitBtn.disabled = false;
+        });
+    });
+}
+
+// CHECK UNREAD MESSAGES BADGES
+async function checkUnreadMessages() {
+    if (!currentUser) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    
+    try {
+        const res = await fetch("/api/messages/unread-count", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const badge = document.getElementById("profileBadge");
+        if (badge) {
+            badge.style.display = data.unreadCount > 0 ? "block" : "none";
+        }
+    } catch (e) {
+        console.error("Failed to check unread messages", e);
+    }
 }
 
 // ==========================================

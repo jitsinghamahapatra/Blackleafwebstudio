@@ -115,10 +115,32 @@ function updateUIState() {
         if (adminNav) {
             adminNav.style.display = currentUser.role === 'admin' ? "inline-block" : "none";
         }
+        checkUnreadMessages();
     } else {
         if (authBtn) authBtn.textContent = "Login";
         if (profileBtn) profileBtn.style.display = "none";
         if (adminNav) adminNav.style.display = "none";
+        const badge = document.getElementById("profileBadge");
+        if (badge) badge.style.display = "none";
+    }
+}
+
+async function checkUnreadMessages() {
+    if (!currentUser) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    
+    try {
+        const res = await fetch("/api/messages/unread-count", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const badge = document.getElementById("profileBadge");
+        if (badge) {
+            badge.style.display = data.unreadCount > 0 ? "block" : "none";
+        }
+    } catch (e) {
+        console.error("Failed to check unread messages", e);
     }
 }
 

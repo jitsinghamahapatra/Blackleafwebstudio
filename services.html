@@ -7,6 +7,70 @@
     <meta name="description" content="Explore professional web design packages, landing pages, corporate websites, and e-commerce setups by Blackleaf Studio.">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- jsPDF and Invoice Generator Utility -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        window.downloadInvoicePDF = function(order, packagePrice) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Design a clean, premium invoice
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(22);
+            doc.text("BLACKLEAF STUDIO", 14, 25);
+            
+            doc.setFontSize(10);
+            doc.setFont("Helvetica", "normal");
+            doc.text("Premium Bespoke Web Design & Hand-Coded Development", 14, 30);
+            
+            // Metadata block
+            doc.setFontSize(10);
+            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 140, 20);
+            doc.text("Invoice ID: INV-" + order._id.toUpperCase().substring(0, 8), 140, 26);
+            
+            doc.line(14, 35, 196, 35);
+            
+            // Billed To
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("BILLED TO:", 14, 45);
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("Client Name: " + order.name, 14, 52);
+            doc.text("Client Email: " + order.email, 14, 58);
+            
+            doc.line(14, 65, 196, 65);
+            
+            // Item details
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("PROJECT DESCRIPTION", 14, 75);
+            
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("Package Plan: " + order.package, 14, 85);
+            
+            const detailsLines = doc.splitTextToSize("Details: " + order.details, 180);
+            doc.text(detailsLines, 14, 92);
+            
+            const detailsHeight = detailsLines.length * 5;
+            const totalY = 92 + detailsHeight + 15;
+            
+            doc.line(14, totalY, 196, totalY);
+            
+            // Price
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text("TOTAL AMOUNT: " + (packagePrice || "Contact for Custom Quote"), 14, totalY + 12);
+            
+            doc.setFontSize(10);
+            doc.setFont("Helvetica", "italic");
+            doc.text("Thank you for choosing Blackleaf Studio! Your project request is being reviewed.", 14, totalY + 25);
+            
+            doc.save("Invoice_" + order._id.substring(0, 8) + ".pdf");
+        };
+    </script>
 </head>
 <body>
 
@@ -24,7 +88,10 @@
             <a href="admin.html" id="adminNav"
                 style="display: none; text-decoration: none; color: inherit; font-weight: bold;"><i
                     class="fa-solid fa-lock"></i> Admin</a>
-            <a href="profile.html" id="profileBtn" class="btn-request btn-outline" style="display: none; text-decoration: none; padding: 10px 20px; font-size: 0.8rem; font-weight: bold;"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="profile.html" id="profileBtn" class="btn-request btn-outline" style="display: none; text-decoration: none; padding: 10px 20px; font-size: 0.8rem; font-weight: bold; position: relative;">
+                <i class="fa-solid fa-user"></i> Profile
+                <span id="profileBadge" style="display: none; position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; background-color: #ff0055; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px #ff0055; animation: pulse-badge 1.5s infinite;"></span>
+            </a>
             <button id="authBtn" class="btn-request btn-outline"
                 style="padding: 10px 20px; font-size: 0.8rem;">Login</button>
         </div>
