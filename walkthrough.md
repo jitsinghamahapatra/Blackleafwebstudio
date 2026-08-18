@@ -53,6 +53,18 @@ We transitioned the Blackleaf Studio web application from Firebase Firestore to 
 - **Portfolio Page**: [`portfolio.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/portfolio.html) & [`portfolio.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/portfolio.js) display a filterable project gallery (Landing pages, Corporate, E-commerce) loaded using automated screenshots.
 - **Contact Page**: [`contact.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.html) & [`contact.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.js) house stylized direct query forms and contact details.
 
+### 6. Premium Checkpoint 3 Improvements
+- **Premium Neo-Brutalist Invoice PDF Layout**: Redesigned `window.downloadInvoicePDF` across HTML pages using solid drawing borders (`doc.rect`), filled headers (`doc.setFillColor`), and custom courier monospaced typography to match the Space Mono web aesthetic.
+- **Dynamic Theme Color Customizer**:
+  - Added Accent Color and Background Color options inside `server/models/Content.js`.
+  - Staged `GET /api/content/theme` and `POST /api/content/theme` server-side routers in `server.js`.
+  - Added a visual Settings panel with color pickers and Hex text input syncing in `admin.html` & `admin.js`.
+- **Theme Caching Scripts**: Staged immediate local caching scripts in the `<head>` of all HTML pages to apply theme colors from `localStorage` immediately upon rendering, avoiding flash of unstyled colors.
+- **Order Progress Stepper Tracker**:
+  - Implemented visual build stepper timelines (1: Placed, 2: Design, 3: Code, 4: Review, 5: Done) inside client requests history cards in `profile.js`.
+  - Implemented a public Track Order modal inside `app.js` (rendered on all pages) where any visitor can search by Invoice ID prefix and view real-time progress.
+- **Admin Status Dropdowns**: Swapped basic pending/done buttons with multi-stage status select dropdown menus in `admin.html` and `admin.js` to change requests statuses directly.
+
 ---
 
 ## 🔍 Verification Results
@@ -69,13 +81,7 @@ We transitioned the Blackleaf Studio web application from Firebase Firestore to 
 
 ### 2. Multi-Page Production Compilation
 - Executed: `npm run build`
-- Build result: **Vite build compiled successfully in 1.91s!**
-- All multi-page assets were successfully compiled:
-  - `dist/index.html` (Home)
-  - `dist/services.html` (Services)
-  - `dist/portfolio.html` (Portfolio)
-  - `dist/contact.html` (Contact)
-  - `dist/admin.html` (Admin Panel)
+- Build result: **Vite build compiled successfully!** All multi-page pages and dynamic script chunks compiled cleanly.
 
 ---
 
@@ -95,4 +101,4 @@ We transitioned the Blackleaf Studio web application from Firebase Firestore to 
      ```bash
      npm run dev
      ```
-4. Access `http://localhost:5173` to test Google registration, Profile edits, and automatic screenshots.
+4. Access `http://localhost:5173` to test Google registration, Profile edits, theme settings customization, progress steppers, and invoice downloads.

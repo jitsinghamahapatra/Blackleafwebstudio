@@ -415,6 +415,69 @@ app.get('/api/orders/my', auth, async (req, res) => {
   }
 });
 
+// GET /api/orders/track/:id -> Public tracking endpoint
+app.get('/api/orders/track/:id', async (req, res) => {
+  let searchId = req.params.id.trim();
+  if (searchId.toUpperCase().startsWith("INV-")) {
+    searchId = searchId.substring(4);
+  }
+  
+  try {
+    const order = await Request.findOne({ 
+      _id: { $regex: '^' + searchId, $options: 'i' } 
+    });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    res.json({
+      success: true,
+      order: {
+        _id: order._id,
+        package: order.package,
+        status: order.status,
+        timestamp: order.timestamp
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error tracking order' });
+  }
+});
+
+// GET /api/content/theme -> Fetch theme settings (Public)
+app.get('/api/content/theme', async (req, res) => {
+  try {
+    const theme = await Content.findOne({ key: 'theme' });
+    if (!theme) {
+      return res.json({ accentColor: '#ffc2d1', bgColor: '#f9f7f2' });
+    }
+    res.json({
+      accentColor: theme.accentColor || '#ffc2d1',
+      bgColor: theme.bgColor || '#f9f7f2'
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error fetching theme settings' });
+  }
+});
+
+// POST /api/content/theme -> Save theme settings (Admin only)
+app.post('/api/content/theme', auth, admin, async (req, res) => {
+  const { accentColor, bgColor } = req.body;
+  try {
+    let theme = await Content.findOne({ key: 'theme' });
+    if (!theme) {
+      theme = new Content({ key: 'theme' });
+    }
+    theme.accentColor = accentColor || '#ffc2d1';
+    theme.bgColor = bgColor || '#f9f7f2';
+    await theme.save();
+    res.json({ success: true, theme });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error saving theme settings' });
+  }
+});
+
 // ==========================================
 // MESSAGES ROUTES
 // ==========================================

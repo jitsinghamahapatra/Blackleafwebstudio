@@ -79,6 +79,7 @@ async function checkAdminAccess() {
             loadPackagesAdmin();
             loadProjectsAdmin();
             loadMessagesAdmin();
+            loadThemeSettingsAdmin();
         } else {
             redirectToLiveSite();
         }
@@ -133,14 +134,17 @@ async function loadOrders() {
                 <td>${data.email}</td>
                 <td><strong>${data.package}</strong></td>
                 <td>${data.details}</td>
-                <td><span class="status-badge ${data.status === 'Completed' ? 'status-completed' : 'status-pending'}">${data.status}</span></td>
                 <td>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap;">
-                        <button class="btn-edit btn-mark" data-id="${data._id}" data-status="${data.status}">
-                            ${data.status === 'Pending' ? 'Mark Done' : 'Mark Pending'}
-                        </button>
-                        <button class="btn-delete btn-del-order" data-id="${data._id}">Delete</button>
-                    </div>
+                    <select class="admin-status-select" data-id="${data._id}" style="border: 2px solid var(--ink-black); font-family: inherit; font-size: 0.8rem; padding: 4px; font-weight: bold; background: white; color: var(--ink-black);">
+                        <option value="Pending" ${data.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Designing" ${data.status === 'Designing' ? 'selected' : ''}>Designing</option>
+                        <option value="Coding" ${data.status === 'Coding' ? 'selected' : ''}>Coding</option>
+                        <option value="Review" ${data.status === 'Review' ? 'selected' : ''}>Review</option>
+                        <option value="Completed" ${data.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="btn-delete btn-del-order" data-id="${data._id}" style="padding: 4px 10px; font-size: 0.8rem;">Delete</button>
                 </td>
             `;
             ordersTbody.appendChild(tr);
@@ -153,23 +157,27 @@ async function loadOrders() {
                 <div class="order-field"><strong>Email:</strong> ${data.email}</div>
                 <div class="order-field"><strong>Pkg:</strong> ${data.package}</div>
                 <div class="order-field"><strong>Details:</strong> ${data.details}</div>
-                <div class="order-field">
-                    <span class="status-badge ${data.status === 'Completed' ? 'status-completed' : 'status-pending'}">${data.status}</span>
+                <div class="order-field" style="margin-top: 10px; color: var(--ink-black);">
+                    <strong>Status:</strong>
+                    <select class="admin-status-select" data-id="${data._id}" style="border: 2px solid var(--ink-black); font-family: inherit; font-size: 0.8rem; padding: 4px; font-weight: bold; background: white; margin-left: 5px; color: var(--ink-black);">
+                        <option value="Pending" ${data.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Designing" ${data.status === 'Designing' ? 'selected' : ''}>Designing</option>
+                        <option value="Coding" ${data.status === 'Coding' ? 'selected' : ''}>Coding</option>
+                        <option value="Review" ${data.status === 'Review' ? 'selected' : ''}>Review</option>
+                        <option value="Completed" ${data.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                    </select>
                 </div>
-                <div class="order-actions">
-                    <button class="btn-edit btn-mark" data-id="${data._id}" data-status="${data.status}">
-                        ${data.status === 'Pending' ? 'Mark Done' : 'Mark Pending'}
-                    </button>
-                    <button class="btn-delete btn-del-order" data-id="${data._id}">Delete</button>
+                <div class="order-actions" style="margin-top: 10px;">
+                    <button class="btn-delete btn-del-order" data-id="${data._id}" style="width: 100%;">Delete</button>
                 </div>
             `;
             mobileOrdersList.appendChild(card);
         });
 
         // Add action listeners
-        document.querySelectorAll(".btn-mark").forEach(btn => {
-            btn.addEventListener("click", () => {
-                toggleOrderStatus(btn.getAttribute("data-id"), btn.getAttribute("data-status"));
+        document.querySelectorAll(".admin-status-select").forEach(select => {
+            select.addEventListener("change", (e) => {
+                updateOrderStatus(select.getAttribute("data-id"), e.target.value);
             });
         });
         document.querySelectorAll(".btn-del-order").forEach(btn => {
@@ -184,9 +192,8 @@ async function loadOrders() {
     }
 }
 
-async function toggleOrderStatus(id, currentStatus) {
+async function updateOrderStatus(id, newStatus) {
     try {
-        const newStatus = currentStatus === 'Pending' ? 'Completed' : 'Pending';
         const res = await fetch(`/api/orders/${id}`, {
             method: "PUT",
             headers: {
@@ -197,12 +204,12 @@ async function toggleOrderStatus(id, currentStatus) {
         });
         if (res.ok) {
             loadOrders();
-            window.customAlert("Order status updated.");
+            window.customAlert("Order status updated successfully.");
         } else {
             window.customAlert("Failed to update status", true);
         }
     } catch (err) {
-        window.customAlert("Error updating order", true);
+        window.customAlert("Error updating order status", true);
     }
 }
 
@@ -765,6 +772,99 @@ if (adminReplyForm) {
     });
 }
 
+
+// ==========================================
+// THEME CONFIGURATION LOGIC
+// ==========================================
+const themeSettingsForm = document.getElementById("themeSettingsForm");
+const accentColorPicker = document.getElementById("accentColorPicker");
+const accentColorHex = document.getElementById("accentColorHex");
+const bgColorPicker = document.getElementById("bgColorPicker");
+const bgColorHex = document.getElementById("bgColorHex");
+
+async function loadThemeSettingsAdmin() {
+    try {
+        const res = await fetch("/api/content/theme");
+        if (res.ok) {
+            const data = await res.json();
+            if (data.accentColor) {
+                accentColorPicker.value = data.accentColor;
+                accentColorHex.value = data.accentColor;
+            }
+            if (data.bgColor) {
+                bgColorPicker.value = data.bgColor;
+                bgColorHex.value = data.bgColor;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to load theme settings in admin", e);
+    }
+}
+
+// Sync color pickers with hex text inputs
+if (accentColorPicker && accentColorHex) {
+    accentColorPicker.addEventListener("input", (e) => {
+        accentColorHex.value = e.target.value;
+    });
+    accentColorHex.addEventListener("input", (e) => {
+        const val = e.target.value;
+        if (/^#[0-9A-F]{6}$/i.test(val)) {
+            accentColorPicker.value = val;
+        }
+    });
+}
+
+if (bgColorPicker && bgColorHex) {
+    bgColorPicker.addEventListener("input", (e) => {
+        bgColorHex.value = e.target.value;
+    });
+    bgColorHex.addEventListener("input", (e) => {
+        const val = e.target.value;
+        if (/^#[0-9A-F]{6}$/i.test(val)) {
+            bgColorPicker.value = val;
+        }
+    });
+}
+
+if (themeSettingsForm) {
+    themeSettingsForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const accentColor = accentColorHex.value;
+        const bgColor = bgColorHex.value;
+        if (!token) return;
+
+        try {
+            const res = await fetch("/api/content/theme", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ accentColor, bgColor })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                window.customAlert("Theme colors updated successfully! Reloading...");
+                
+                // Cache locally immediately
+                localStorage.setItem("themeAccentColor", accentColor);
+                localStorage.setItem("themeBgColor", bgColor);
+                
+                // Apply immediately
+                document.documentElement.style.setProperty("--accent-pink", accentColor);
+                document.documentElement.style.setProperty("--bg-cream", bgColor);
+                
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                window.customAlert(data.message || "Failed to save settings", true);
+            }
+        } catch (err) {
+            window.customAlert("Server connection error saving settings", true);
+        }
+    });
+}
 
 // Check admin session on startup
 checkAdminAccess();

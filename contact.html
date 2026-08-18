@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        (function() {
+            const accent = localStorage.getItem("themeAccentColor");
+            const bg = localStorage.getItem("themeBgColor");
+            if (accent) document.documentElement.style.setProperty("--accent-pink", accent);
+            if (bg) document.documentElement.style.setProperty("--bg-cream", bg);
+        })();
+        window.loadThemeSettings = async function() {
+            try {
+                const res = await fetch("/api/content/theme");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.accentColor) {
+                        document.documentElement.style.setProperty("--accent-pink", data.accentColor);
+                        localStorage.setItem("themeAccentColor", data.accentColor);
+                    }
+                    if (data.bgColor) {
+                        document.documentElement.style.setProperty("--bg-cream", data.bgColor);
+                        localStorage.setItem("themeBgColor", data.bgColor);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load theme settings", e);
+            }
+        };
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackleaf - Contact Us</title>
@@ -21,6 +47,7 @@
             <a href="index.html" style="text-decoration: none; color: inherit;">Home</a>
             <a href="services.html" style="text-decoration: none; color: inherit;">Services</a>
             <a href="contact.html" style="text-decoration: none; color: inherit; font-weight: bold;">Contact</a>
+            <a href="#" id="trackOrderNav" style="text-decoration: none; color: inherit; font-weight: bold;"><i class="fa-solid fa-magnifying-glass"></i> Track Order</a>
             <a href="admin.html" id="adminNav"
                 style="display: none; text-decoration: none; color: inherit; font-weight: bold;"><i
                     class="fa-solid fa-lock"></i> Admin</a>
@@ -164,6 +191,24 @@
     </div>
 
 
+
+    <!-- Track Order Modal -->
+    <div id="trackOrderModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 500px;">
+            <button class="modal-close" id="closeTrackOrderModal"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="font-family: 'Space Mono', monospace; font-size: 1.5rem; margin-top:0;">Track Your Project</h2>
+            <p style="margin-bottom: 20px; opacity:0.8;">Enter your Invoice ID (e.g. INV-XXXX) to track real-time build progress.</p>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <input type="text" id="trackOrderIdInput" class="form-input" placeholder="Invoice ID (e.g. INV-64D3065A)" style="flex:1; border:2px solid var(--ink-black); padding: 8px 12px; font-family:inherit; background: transparent;">
+                <button id="btnTrackSubmit" class="btn-request" style="padding: 8px 20px;">Track</button>
+            </div>
+            
+            <div id="trackOrderResult" style="display:none; border:2px dashed var(--ink-black); padding:15px; background:#fafafa; color: var(--ink-black);">
+                <!-- Dynamically populated tracking timeline -->
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="contact.js"></script>
 </body>

@@ -728,10 +728,106 @@ if (orderForm) {
 // INITIALIZE
 // ==========================================
 async function init() {
+    if (window.loadThemeSettings) await window.loadThemeSettings();
     await restoreSession();
     await loadContent();
     await loadPackages();
     await loadProjects();
+    setupTrackOrder();
+}
+
+// ==========================================
+// TRACK ORDER LOGIC
+// ==========================================
+function setupTrackOrder() {
+    const trackOrderNav = document.getElementById("trackOrderNav");
+    const trackOrderModal = document.getElementById("trackOrderModal");
+    const closeTrackOrderModal = document.getElementById("closeTrackOrderModal");
+    const btnTrackSubmit = document.getElementById("btnTrackSubmit");
+    const trackOrderIdInput = document.getElementById("trackOrderIdInput");
+    const trackOrderResult = document.getElementById("trackOrderResult");
+
+    const openM = (modal) => { if (modal) modal.classList.add("active"); };
+    const closeM = (modal) => { if (modal) modal.classList.remove("active"); };
+
+    if (trackOrderNav && trackOrderModal) {
+        trackOrderNav.addEventListener("click", (e) => {
+            e.preventDefault();
+            trackOrderIdInput.value = "";
+            trackOrderResult.style.display = "none";
+            openM(trackOrderModal);
+        });
+    }
+
+    if (closeTrackOrderModal) {
+        closeTrackOrderModal.addEventListener("click", () => closeM(trackOrderModal));
+    }
+
+    if (btnTrackSubmit) {
+        btnTrackSubmit.addEventListener("click", async () => {
+            const id = trackOrderIdInput.value.trim();
+            if (!id) return window.customAlert("Please enter an Invoice ID.", true);
+            
+            btnTrackSubmit.textContent = "...";
+            try {
+                const res = await fetch(`/api/orders/track/${id}`);
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    trackOrderResult.style.display = "block";
+                    
+                    const order = data.order;
+                    let activeStep = 1;
+                    if (order.status === "Pending") activeStep = 1;
+                    else if (order.status === "Designing") activeStep = 2;
+                    else if (order.status === "Coding") activeStep = 3;
+                    else if (order.status === "Review") activeStep = 4;
+                    else if (order.status === "Completed") activeStep = 5;
+                    
+                    const dateStr = new Date(order.timestamp).toLocaleDateString();
+
+                    trackOrderResult.innerHTML = `
+                        <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
+                            <strong>Package:</strong> ${order.package}<br>
+                            <strong>Order Date:</strong> ${dateStr}<br>
+                            <strong>Current Status:</strong> <span style="font-weight:bold; color:var(--accent-pink);">${order.status}</span>
+                        </div>
+                        
+                        <div class="stepper" style="display: flex; justify-content: space-between; position: relative; margin-top: 15px; padding: 0 5px;">
+                            <div style="position: absolute; top: 12px; left: 15px; right: 15px; height: 3px; background-color: var(--ink-black); z-index: 1;"></div>
+                            
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 1 ? '#dde5b6' : 'white'};">1</div>
+                                <span style="font-size: 0.6rem; font-weight: bold;">Placed</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 2 ? '#dde5b6' : 'white'};">2</div>
+                                <span style="font-size: 0.6rem; font-weight: bold;">Design</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 3 ? '#dde5b6' : 'white'};">3</div>
+                                <span style="font-size: 0.6rem; font-weight: bold;">Code</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 4 ? '#dde5b6' : 'white'};">4</div>
+                                <span style="font-size: 0.6rem; font-weight: bold;">Review</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 5 ? '#dde5b6' : 'white'};">5</div>
+                                <span style="font-size: 0.6rem; font-weight: bold;">Done</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    trackOrderResult.style.display = "none";
+                    window.customAlert(data.message || "Order not found. Check the ID prefix.", true);
+                }
+            } catch (err) {
+                window.customAlert("Error querying tracker.", true);
+            }
+            btnTrackSubmit.textContent = "Track";
+        });
+    }
 }
 
 init();

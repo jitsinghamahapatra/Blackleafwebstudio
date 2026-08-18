@@ -2,6 +2,32 @@
 <html lang="en">
 
 <head>
+    <script>
+        (function() {
+            const accent = localStorage.getItem("themeAccentColor");
+            const bg = localStorage.getItem("themeBgColor");
+            if (accent) document.documentElement.style.setProperty("--accent-pink", accent);
+            if (bg) document.documentElement.style.setProperty("--bg-cream", bg);
+        })();
+        window.loadThemeSettings = async function() {
+            try {
+                const res = await fetch("/api/content/theme");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.accentColor) {
+                        document.documentElement.style.setProperty("--accent-pink", data.accentColor);
+                        localStorage.setItem("themeAccentColor", data.accentColor);
+                    }
+                    if (data.bgColor) {
+                        document.documentElement.style.setProperty("--bg-cream", data.bgColor);
+                        localStorage.setItem("themeBgColor", data.bgColor);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load theme settings", e);
+            }
+        };
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -37,58 +63,96 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Design a clean, premium invoice
-            doc.setFont("Helvetica", "bold");
+            // Set draw color to deep ink black
+            doc.setDrawColor(26, 26, 26);
+            doc.setLineWidth(0.8);
+            
+            // Page border (frame)
+            doc.rect(8, 8, 194, 280);
+            
+            // Header box filled with dynamic theme color
+            const accentColor = localStorage.getItem("themeAccentColor") || "#ffc2d1";
+            function hexToRgb(hex) {
+                const bigint = parseInt(hex.replace("#", ""), 16);
+                return {
+                    r: (bigint >> 16) & 255,
+                    g: (bigint >> 8) & 255,
+                    b: bigint & 255
+                };
+            }
+            const rgb = hexToRgb(accentColor);
+            doc.setFillColor(rgb.r, rgb.g, rgb.b);
+            doc.rect(14, 14, 182, 35, "FD");
+            
+            // Blackleaf title
+            doc.setFont("courier", "bold");
             doc.setFontSize(22);
-            doc.text("BLACKLEAF STUDIO", 14, 25);
+            doc.setTextColor(26, 26, 26);
+            doc.text("BLACKLEAF STUDIO", 20, 28);
             
+            doc.setFont("courier", "italic");
+            doc.setFontSize(9);
+            doc.text("Premium Bespoke Web Design & Hand-Coded Development", 20, 36);
+            doc.text("https://blackleaf.web.app", 20, 42);
+            
+            // Metadata Block (Right side of header)
+            doc.rect(130, 18, 60, 27, "FD");
+            doc.setFillColor(255, 255, 255);
+            doc.setFont("courier", "bold");
             doc.setFontSize(10);
-            doc.setFont("Helvetica", "normal");
-            doc.text("Premium Bespoke Web Design & Hand-Coded Development", 14, 30);
+            doc.text("INVOICE", 135, 25);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(8);
+            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 135, 31);
+            doc.text("ID: INV-" + order._id.toUpperCase().substring(0, 8), 135, 37);
             
-            // Metadata block
+            // Billed To Box
+            doc.setFillColor(221, 229, 182); // green #dde5b6
+            doc.rect(14, 57, 182, 32, "FD");
+            
+            doc.setFont("courier", "bold");
+            doc.setFontSize(11);
+            doc.text("BILLED TO:", 20, 65);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(9);
+            doc.text("Client Name:  " + order.name, 20, 73);
+            doc.text("Client Email: " + order.email, 20, 80);
+            
+            // Item Table Box
+            doc.setFillColor(255, 255, 255);
+            doc.rect(14, 97, 182, 100, "FD");
+            doc.line(14, 110, 196, 110); // Table Header separator
+            
+            doc.setFont("courier", "bold");
+            doc.setFontSize(11);
+            doc.text("ITEM DESCRIPTION", 20, 105);
+            doc.text("TOTAL RATE", 150, 105);
+            
+            doc.setFont("courier", "normal");
             doc.setFontSize(10);
-            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 140, 20);
-            doc.text("Invoice ID: INV-" + order._id.toUpperCase().substring(0, 8), 140, 26);
+            doc.text("Package Plan: " + order.package, 20, 120);
             
-            doc.line(14, 35, 196, 35);
+            const detailsLines = doc.splitTextToSize("Details: " + order.details, 120);
+            doc.text(detailsLines, 20, 130);
             
-            // Billed To
-            doc.setFont("Helvetica", "bold");
+            // Price column
+            doc.setFont("courier", "bold");
             doc.setFontSize(12);
-            doc.text("BILLED TO:", 14, 45);
-            doc.setFont("Helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text("Client Name: " + order.name, 14, 52);
-            doc.text("Client Email: " + order.email, 14, 58);
+            doc.text(packagePrice || "Contact", 150, 120);
             
-            doc.line(14, 65, 196, 65);
+            // Total Box
+            doc.setFillColor(255, 247, 242);
+            doc.rect(14, 207, 182, 20, "FD");
+            doc.setFont("courier", "bold");
+            doc.setFontSize(11);
+            doc.text("TOTAL DUE AMOUNT:", 20, 219);
+            doc.text(packagePrice || "Contact for Custom Quote", 130, 219);
             
-            // Item details
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(12);
-            doc.text("PROJECT DESCRIPTION", 14, 75);
-            
-            doc.setFont("Helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text("Package Plan: " + order.package, 14, 85);
-            
-            const detailsLines = doc.splitTextToSize("Details: " + order.details, 180);
-            doc.text(detailsLines, 14, 92);
-            
-            const detailsHeight = detailsLines.length * 5;
-            const totalY = 92 + detailsHeight + 15;
-            
-            doc.line(14, totalY, 196, totalY);
-            
-            // Price
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("TOTAL AMOUNT: " + (packagePrice || "Contact for Custom Quote"), 14, totalY + 12);
-            
-            doc.setFontSize(10);
-            doc.setFont("Helvetica", "italic");
-            doc.text("Thank you for choosing Blackleaf Studio! Your project request is being reviewed.", 14, totalY + 25);
+            // Footer message
+            doc.setFont("courier", "italic");
+            doc.setFontSize(9);
+            doc.text("Thank you for choosing Blackleaf Studio! Your project request is being reviewed.", 14, 245);
+            doc.text("We design for performance. No templates, no builders, pure handcraft.", 14, 251);
             
             doc.save("Invoice_" + order._id.substring(0, 8) + ".pdf");
         };
@@ -108,6 +172,7 @@
             <a href="index.html" style="text-decoration: none; color: inherit;">Home</a>
             <a href="services.html" style="text-decoration: none; color: inherit;">Services</a>
             <a href="contact.html" style="text-decoration: none; color: inherit;">Contact</a>
+            <a href="#" id="trackOrderNav" style="text-decoration: none; color: inherit; font-weight: bold;"><i class="fa-solid fa-magnifying-glass"></i> Track Order</a>
             <a href="admin.html" id="adminNav"
                 style="display: none; text-decoration: none; color: inherit; font-weight: bold;"><i
                     class="fa-solid fa-lock"></i> Admin</a>
@@ -394,6 +459,24 @@
     </div>
 
 
+
+    <!-- Track Order Modal -->
+    <div id="trackOrderModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 500px;">
+            <button class="modal-close" id="closeTrackOrderModal"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="font-family: 'Space Mono', monospace; font-size: 1.5rem; margin-top:0;">Track Your Project</h2>
+            <p style="margin-bottom: 20px; opacity:0.8;">Enter your Invoice ID (e.g. INV-XXXX) to track real-time build progress.</p>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <input type="text" id="trackOrderIdInput" class="form-input" placeholder="Invoice ID (e.g. INV-64D3065A)" style="flex:1; border:2px solid var(--ink-black); padding: 8px 12px; font-family:inherit; background: transparent;">
+                <button id="btnTrackSubmit" class="btn-request" style="padding: 8px 20px;">Track</button>
+            </div>
+            
+            <div id="trackOrderResult" style="display:none; border:2px dashed var(--ink-black); padding:15px; background:#fafafa; color: var(--ink-black);">
+                <!-- Dynamically populated tracking timeline -->
+            </div>
+        </div>
+    </div>
 
     <!-- Order Modal -->
     <div id="orderModal" class="modal-overlay">

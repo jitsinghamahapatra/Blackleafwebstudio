@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        (function() {
+            const accent = localStorage.getItem("themeAccentColor");
+            const bg = localStorage.getItem("themeBgColor");
+            if (accent) document.documentElement.style.setProperty("--accent-pink", accent);
+            if (bg) document.documentElement.style.setProperty("--bg-cream", bg);
+        })();
+        window.loadThemeSettings = async function() {
+            try {
+                const res = await fetch("/api/content/theme");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.accentColor) {
+                        document.documentElement.style.setProperty("--accent-pink", data.accentColor);
+                        localStorage.setItem("themeAccentColor", data.accentColor);
+                    }
+                    if (data.bgColor) {
+                        document.documentElement.style.setProperty("--bg-cream", data.bgColor);
+                        localStorage.setItem("themeBgColor", data.bgColor);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load theme settings", e);
+            }
+        };
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackleaf - Admin Dashboard</title>
@@ -26,6 +52,7 @@
             <button class="mobile-tab" data-target="tab-packages"><i class="fa-solid fa-tags"></i><span>Packages</span></button>
             <button class="mobile-tab" data-target="tab-projects"><i class="fa-solid fa-image"></i><span>Works</span></button>
             <button class="mobile-tab" data-target="tab-messages"><i class="fa-solid fa-envelope"></i><span>Messages</span></button>
+            <button class="mobile-tab" data-target="tab-settings"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
         </div>
 
         <aside class="sidebar">
@@ -35,6 +62,7 @@
                 <li class="nav-item" data-target="tab-packages"><i class="fa-solid fa-tags"></i> Pricing Packages</li>
                 <li class="nav-item" data-target="tab-projects"><i class="fa-solid fa-image"></i> Recent Works</li>
                 <li class="nav-item" data-target="tab-messages"><i class="fa-solid fa-envelope"></i> Contact Messages</li>
+                <li class="nav-item" data-target="tab-settings"><i class="fa-solid fa-gear"></i> Theme Settings</li>
             </ul>
         </aside>
 
@@ -146,6 +174,26 @@
                         </tbody>
                     </table>
                 </div>
+            </section>
+
+            <!-- SETTINGS TAB -->
+            <section id="tab-settings" class="tab-pane">
+                <h2>Theme Settings</h2>
+                <form id="themeSettingsForm" class="admin-form" style="max-width: 500px; background: white; padding: 25px; border: 2px solid var(--ink-black); box-shadow: 6px 6px 0px var(--ink-black); color: var(--ink-black); margin-top:20px;">
+                    <label style="display:block; font-weight:bold; margin-bottom: 6px;">Theme Accent Color (replaces the pink accent):</label>
+                    <div style="display:flex; gap:12px; align-items:center; margin-bottom: 20px;">
+                        <input type="color" id="accentColorPicker" value="#ffc2d1" style="width: 50px; height: 50px; border: 2px solid var(--ink-black); cursor: pointer; padding: 0; background: none;">
+                        <input type="text" id="accentColorHex" value="#ffc2d1" placeholder="#ffc2d1" class="form-input" style="flex:1; text-transform: uppercase; border:2px solid var(--ink-black); padding: 10px; font-family: inherit;">
+                    </div>
+
+                    <label style="display:block; font-weight:bold; margin-bottom: 6px;">Theme Page Background Color:</label>
+                    <div style="display:flex; gap:12px; align-items:center; margin-bottom: 25px;">
+                        <input type="color" id="bgColorPicker" value="#f9f7f2" style="width: 50px; height: 50px; border: 2px solid var(--ink-black); cursor: pointer; padding: 0; background: none;">
+                        <input type="text" id="bgColorHex" value="#f9f7f2" placeholder="#f9f7f2" class="form-input" style="flex:1; text-transform: uppercase; border:2px solid var(--ink-black); padding: 10px; font-family: inherit;">
+                    </div>
+
+                    <button type="submit" class="btn-request" style="width:100%;">Save Theme Settings</button>
+                </form>
             </section>
         </main>
     </div>

@@ -26,6 +26,14 @@ const ContentSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  accentColor: {
+    type: String,
+    default: '#ffc2d1',
+  },
+  bgColor: {
+    type: String,
+    default: '#f9f7f2',
+  },
 });
 
 export default mongoose.model('Content', ContentSchema, 'content');

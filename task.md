@@ -29,3 +29,10 @@
   - [x] Run backend seeding script and verify database collections in MongoDB (Verified Atlas connection, fails on placeholder auth credentials as expected)
   - [x] Build the Vite multi-page project
   - [x] Run verification tests for Google login, profile edits, website screenshots, and order submission
+- [x] Checkpoint 3 Enhancements
+  - [x] Premium Neo-Brutalist Invoice PDF Redesign (ink frames, courier fonts, theme color header backgrounds)
+  - [x] Color Customizer Tab (Accent Color picker & Hex syncing, BG Color picker & Hex syncing) in Admin Settings
+  - [x] Dynamic Theme Cache Script (localStorage caching in header of all pages to prevent flash of unstyled content)
+  - [x] Visual Order Stepper Timeline Tracker (placed in Client Dashboard requests list and global search Track Order Modal)
+  - [x] Multi-Stage Admin Order Status Dropdowns (dropdown select inputs to update order status stages live)
+

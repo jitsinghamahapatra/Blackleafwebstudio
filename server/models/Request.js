@@ -27,7 +27,7 @@ const RequestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Completed'],
+    enum: ['Pending', 'Designing', 'Coding', 'Review', 'Completed'],
     default: 'Pending',
   },
   timestamp: {
