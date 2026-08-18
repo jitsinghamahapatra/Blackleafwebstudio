@@ -47,40 +47,12 @@
             <a href="admin.html" id="adminNav"
                 style="display: none; text-decoration: none; color: inherit; font-weight: bold;"><i
                     class="fa-solid fa-lock"></i> Admin</a>
-            <button id="profileBtn" class="btn-request btn-outline" style="display: none; padding: 10px 20px; font-size: 0.8rem;"><i class="fa-solid fa-user"></i> Profile</button>
+            <a href="profile.html" id="profileBtn" class="btn-request btn-outline" style="display: none; text-decoration: none; padding: 10px 20px; font-size: 0.8rem; font-weight: bold;"><i class="fa-solid fa-user"></i> Profile</a>
             <button id="authBtn" class="btn-request btn-outline"
                 style="padding: 10px 20px; font-size: 0.8rem;">Login</button>
         </div>
         <div class="nav-overlay" id="navOverlay"></div>
     </nav>
-
-    <!-- Inline Profile Section (Hidden by default) -->
-    <section id="profileSection" class="profile-section-inline" style="display: none; background: var(--bg-cream); border-bottom: 2px solid var(--ink-black); padding: 45px 20px;">
-        <div class="profile-card-inline" style="max-width: 480px; margin: 0 auto; border: 2px solid var(--ink-black); padding: 35px; background: white; box-shadow: 10px 10px 0px var(--ink-black); position: relative;">
-            <button type="button" class="modal-close" id="closeProfileBtn"><i class="fa-solid fa-xmark"></i></button>
-            <h2 style="margin-top: 0; margin-bottom: 5px; font-family: 'Space Mono', monospace; font-size: 1.6rem; letter-spacing: -1px;">My Profile</h2>
-            <p style="margin-bottom: 25px; opacity: 0.7; font-size: 0.9rem;">Manage your account details directly on page.</p>
-            <form id="profileForm" style="display: flex; flex-direction: column; gap: 15px;">
-                <div>
-                    <label style="display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Email Address (Cannot change):</label>
-                    <input type="email" id="profileEmail" class="form-input" readonly disabled style="background-color: #eee; cursor: not-allowed; width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit;">
-                </div>
-                <div>
-                    <label style="display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Full Name:</label>
-                    <input type="text" id="profileName" class="form-input" placeholder="Full Name" required style="width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit; background: transparent;">
-                </div>
-                <div>
-                    <label style="display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Phone Number:</label>
-                    <input type="text" id="profilePhone" class="form-input" placeholder="Phone Number" required style="width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit; background: transparent;">
-                </div>
-                <div>
-                    <label style="display: block; font-weight: bold; margin-bottom: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Change Password (Leave blank to keep current):</label>
-                    <input type="password" id="profilePassword" class="form-input" placeholder="New Password" style="width: 100%; border: 2px solid var(--ink-black); padding: 10px; font-family: inherit; background: transparent;">
-                </div>
-                <button type="submit" id="profileSubmitBtn" class="btn-request" style="width: 100%; margin-top: 10px; padding: 12px;">Update Profile</button>
-            </form>
-        </div>
-    </section>
 
     <!-- Click Ripple Container (global) -->
     <div id="clickRippleContainer"></div>

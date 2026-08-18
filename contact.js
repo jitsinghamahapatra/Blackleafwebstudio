@@ -79,8 +79,7 @@ const adminNav = document.getElementById("adminNav");
 const authModal = document.getElementById("authModal");
 const closeAuthModal = document.getElementById("closeAuthModal");
 const completeRegModal = document.getElementById("completeRegModal");
-const profileSection = document.getElementById("profileSection");
-const closeProfileBtn = document.getElementById("closeProfileBtn");
+
 
 // Auth Inputs
 const googleAuthBtn = document.getElementById("googleAuthBtn");
@@ -95,12 +94,7 @@ const regName = document.getElementById("regName");
 const regPhone = document.getElementById("regPhone");
 const regPassword = document.getElementById("regPassword");
 
-// Profile Inputs
-const profileForm = document.getElementById("profileForm");
-const profileEmail = document.getElementById("profileEmail");
-const profileName = document.getElementById("profileName");
-const profilePhone = document.getElementById("profilePhone");
-const profilePassword = document.getElementById("profilePassword");
+
 
 // Contact Inputs
 const contactForm = document.getElementById("contactForm");
@@ -118,11 +112,7 @@ function openModal(modal) { if (modal) modal.classList.add("active"); }
 function closeModal(modal) { if (modal) modal.classList.remove("active"); }
 
 if (closeAuthModal) closeAuthModal.addEventListener("click", () => closeModal(authModal));
-if (closeProfileBtn && profileSection) {
-    closeProfileBtn.addEventListener("click", () => {
-        profileSection.style.display = "none";
-    });
-}
+
 
 // Update login state UI
 function updateUIState() {
@@ -181,24 +171,7 @@ if (authBtn) {
     });
 }
 
-// PROFILE IN-PAGE TRIGGER
-if (profileBtn) {
-    profileBtn.addEventListener("click", () => {
-        if (!currentUser) return;
-        profileEmail.value = currentUser.email;
-        profileName.value = currentUser.name;
-        profilePhone.value = currentUser.phone || "";
-        profilePassword.value = "";
-        
-        if (profileSection) {
-            const isHidden = profileSection.style.display === "none";
-            profileSection.style.display = isHidden ? "block" : "none";
-            if (isHidden) {
-                profileSection.scrollIntoView({ behavior: "smooth" });
-            }
-        }
-    });
-}
+
 
 // ==========================================
 // AUTH ROUTE CALLS
@@ -318,41 +291,7 @@ if (emailAuthBtn) {
     });
 }
 
-// Profile update form submit
-if (profileForm) {
-    profileForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem("token");
-        if (!token) return;
 
-        try {
-            const res = await fetch("/api/auth/update-profile", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    name: profileName.value,
-                    phone: profilePhone.value,
-                    password: profilePassword.value || undefined
-                })
-            });
-            const data = await res.json();
-
-            if (res.ok && data.success) {
-                currentUser = data.user;
-                updateUIState();
-                if (profileSection) profileSection.style.display = "none";
-                window.customAlert("Profile updated successfully!");
-            } else {
-                window.customAlert(data.message || "Failed to update profile", true);
-            }
-        } catch (err) {
-            window.customAlert("Error connecting to server", true);
-        }
-    });
-}
 
 // ==========================================
 // CONTACT FORM SUBMISSION
