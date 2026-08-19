@@ -1373,3 +1373,20 @@ label {
     transform: translate(2px, 2px) !important;
     box-shadow: 2px 2px 0 var(--ink-black) !important;
 }
+
+/* Mobile Optimization for Dashboard Tabs & Panels */
+@media screen and (max-width: 768px) {
+    .dashboard-tabs {
+        flex-direction: column !important;
+        gap: 12px !important;
+        margin: 25px auto 25px auto !important;
+    }
+    .dashboard-tabs .tab-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 12px 20px !important;
+    }
+    .contact-form-container {
+        padding: 25px 15px !important;
+    }
+}

@@ -20,34 +20,36 @@
             doc.setDrawColor(0, 0, 0);
             doc.setLineWidth(0.4);
             
+            // Page border (frame) - Dashed
+            doc.setLineDashPattern([1.5, 1.5], 0);
+            doc.rect(8, 8, 194, 280);
+            doc.setLineDashPattern([], 0); // Reset dash pattern for solid lines
+            
             // Brand name top-left
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(18);
+            doc.setFontSize(22);
             doc.setTextColor(0, 0, 0);
-            doc.text("BLACKLEAF STUDIO", 20, 30);
+            doc.text("BLACKLEAF WEB", 20, 25);
+            doc.text("STUDIO", 20, 33);
+            
+            // INVoice ID below brand name
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("INVoice ID: " + order._id.toUpperCase().substring(0, 8), 20, 45);
             
             // INVOICE title top-right
             doc.setFont("helvetica", "bold");
             doc.setFontSize(28);
-            doc.setTextColor(0, 0, 0);
             doc.text("INVOICE", 130, 30);
             
-            // Big prominent Invoice ID right below title
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(16);
-            doc.setTextColor(0, 0, 0);
-            doc.text("INVoice ID: " + order._id.toUpperCase().substring(0, 8), 130, 40);
-            
-            // Invoice date below ID
+            // Invoice date below title
             doc.setFont("helvetica", "normal");
             doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 130, 48);
+            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 130, 38);
             
             // Billed To / From Section
             doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
             doc.text("BILLED TO:", 20, 65);
             doc.setFont("helvetica", "normal");
             doc.text(order.name, 50, 65);
@@ -62,19 +64,19 @@
             // Table Section Headers
             doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
             doc.text("DESCRIPTION", 20, 115);
             doc.text("RATE", 120, 115);
             doc.text("HOURS", 150, 115);
             doc.text("AMOUNT", 175, 115);
             
-            // Table Line divider
+            // Table Line divider - Solid black line
+            doc.setLineWidth(0.6);
             doc.line(20, 118, 190, 118);
+            doc.setLineWidth(0.4);
             
             // Row 1 - Package name & price
             doc.setFont("helvetica", "normal");
             doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
             doc.text(order.package + " Plan", 20, 126);
             doc.text(packagePrice || "Contact", 120, 126);
             doc.text("1", 150, 126);
@@ -83,12 +85,11 @@
             // Details Subtext
             doc.setFont("helvetica", "normal");
             doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
             const detailsLines = doc.splitTextToSize("Details: " + order.details, 170);
             
             let currentY = 132;
             for (let i = 0; i < detailsLines.length; i++) {
-                if (currentY > 265) {
+                if (currentY > 250) {
                     doc.addPage();
                     currentY = 25;
                 }
@@ -99,35 +100,40 @@
             const separatorY = currentY + 2;
             
             // Check if there is enough space on page for Total and Footer
-            if (separatorY > 240) {
+            if (separatorY > 230) {
                 doc.addPage();
                 currentY = 25;
             } else {
                 currentY = separatorY;
             }
             
-            // Row divider line
-            doc.setDrawColor(180, 180, 180);
+            // Row divider line - Gray
+            doc.setDrawColor(200, 200, 200);
             doc.line(20, currentY, 190, currentY);
             
             // Total row
             const totalY = currentY + 12;
             doc.setFont("helvetica", "bold");
             doc.setFontSize(11);
-            doc.setTextColor(0, 0, 0);
-            doc.text("TOTAL AMOUNT:", 20, totalY);
+            doc.text("TOTAL AMOUNT :", 20, totalY);
             doc.text(packagePrice || "Contact", 175, totalY);
             
-            // Final border line under total
+            // Final border line under total - Solid black line
             doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.6);
             doc.line(20, totalY + 4, 190, totalY + 4);
+            doc.setLineWidth(0.4);
             
             // Footer message
-            const footerY = totalY + 20;
+            const footerY = totalY + 12;
             doc.setFont("helvetica", "normal");
             doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-            doc.text("Thank you for your business.", 20, footerY);
+            doc.text("This invoice is provided for reference purposes only. Payment can be made through any mutually agreed payment method. Thank you for your business.", 20, footerY, { maxWidth: 170 });
+            
+            // Disclaimer at bottom-right corner of the last page
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
+            doc.text("*This invoice was system-generated and does not require manual authorization.", 200, 285, { align: "right" });
             
             doc.save("Invoice_" + order._id.substring(0, 8) + ".pdf");
         };
@@ -169,7 +175,7 @@
     </section>
 
     <!-- DASHBOARD TABS BAR -->
-    <div class="dashboard-tabs anim-fade-up" style="display: flex; justify-content: center; gap: 15px; margin: 0 auto 30px auto; max-width: 1000px; padding: 0 20px; flex-wrap: wrap;">
+    <div class="dashboard-tabs anim-fade-up" style="display: flex; justify-content: center; gap: 15px; margin: 40px auto 40px auto; max-width: 1000px; padding: 0 20px; flex-wrap: wrap;">
         <button class="tab-btn active" data-tab="requests" style="font-family: inherit; font-weight: bold; font-size: 0.95rem; padding: 12px 24px; border: 3px solid var(--ink-black); background: var(--accent-pink); cursor: pointer; box-shadow: 4px 4px 0 var(--ink-black); transform: translate(2px, 2px); transition: all 0.15s; display: flex; align-items: center; gap: 8px;">
             <i class="fa-solid fa-list-check"></i> Project Requests
         </button>

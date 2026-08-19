@@ -115,11 +115,13 @@ We transitioned the Blackleaf Studio web application from Firebase Firestore to 
 
 ---
 
-### 1. Minimal All-Black Text Invoice
-- Simplified the invoice layout in `downloadInvoicePDF` (`index.html`, `services.html`, `profile.html`) to:
-  - Keep all text strictly **black** (`doc.setTextColor(0, 0, 0)`) with clean black borders and lines.
-  - Display the **`INVoice ID: [ID]`** prominently at the top right in a very large **Helvetica Bold Size 16** font for quick lookup.
-  - Remove all unnecessary layout noise (such as bank details, payment instructions, and mock company addresses), leaving only the essential Billing, Order Package, and Total details.
+### 1. Minimal All-Black Text Invoice (Screenshot Matched)
+- Updated the invoice layout in `downloadInvoicePDF` (`index.html`, `services.html`, `profile.html`) to match your reference layout screenshot:
+  - Added a dashed/dotted outer page border frame (`doc.setLineDashPattern([1.5, 1.5], 0)`).
+  - Repositioned the **`INVoice ID: [ID]`** metadata line directly below the main brand header title `BLACKLEAF WEB STUDIO` in bold Helvetica Size 12.
+  - Formatted the title headers and total rows with custom solid black separator lines.
+  - Added the official billing and reference footer messages.
+  - Positioned and right-aligned the bottom disclaimer text at the very bottom right of the page frame closer to the margin (Y=285, X=200, aligned "right") using the phrasing: `*This invoice was system-generated and does not require manual authorization.`.
 
 ### 2. Redesigned Client Dashboard Tabs Interface
 - Replaced the cluttered three-panel layout with a responsive, modern Tab Bar interface in [`profile.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.html).
@@ -128,6 +130,10 @@ We transitioned the Blackleaf Studio web application from Firebase Firestore to 
   - **Support Inbox**: The quick reply messages thread.
   - **Account Settings**: Centered form block to manage user credentials.
 - Configured dynamic tab-toggle state changes in [`profile.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js) and custom neo-brutalist hover/active transition rules in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css).
+- **Layout Spacing & Mobile Optimization**:
+  - Increased the vertical gap between the dashboard hero header and the Tab Bar (`margin: 40px auto 40px auto;`) to prevent layout crowding.
+  - Added CSS media queries in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css) for devices under 768px wide to stack tab buttons vertically at full width (`width: 100%`) with clean gap separations, resolving button wrapping overlapping bugs on mobile screens.
+  - Scaled form container internal padding on mobile to optimize viewports.
 
 ### 3. Dashboard Quick Reply Form Typing Fix
 - Fixed a bug in [`profile.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js) where clicking inside thread reply text inputs triggered the parent card's click event. The card event listener would mark message threads as read and trigger a full profile re-rendering, causing the input control to lose focus and blow away typing. Added an element check guard to return early when interacting with form input controls.
