@@ -79,7 +79,6 @@ async function checkAdminAccess() {
             loadPackagesAdmin();
             loadProjectsAdmin();
             loadMessagesAdmin();
-            loadThemeSettingsAdmin();
         } else {
             redirectToLiveSite();
         }
@@ -119,13 +118,14 @@ async function loadOrders() {
         mobileOrdersList.innerHTML = "";
         
         if (orders.length === 0) {
-            ordersTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px;">No requests yet.</td></tr>`;
+            ordersTbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px;">No requests yet.</td></tr>`;
             mobileOrdersList.innerHTML = `<p style="text-align:center; padding:20px; opacity:0.6;">No requests yet.</p>`;
             return;
         }
 
         orders.forEach((data) => {
             const dateStr = data.timestamp ? new Date(data.timestamp).toLocaleString() : "Unknown";
+            const currentPayment = data.paymentStatus || "Not Paid";
             
             // Desktop Row
             const tr = document.createElement("tr");
@@ -141,6 +141,13 @@ async function loadOrders() {
                         <option value="Coding" ${data.status === 'Coding' ? 'selected' : ''}>Coding</option>
                         <option value="Review" ${data.status === 'Review' ? 'selected' : ''}>Review</option>
                         <option value="Completed" ${data.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                        <option value="Delivered" ${data.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="admin-payment-select" data-id="${data._id}" style="border: 2px solid var(--ink-black); font-family: inherit; font-size: 0.8rem; padding: 4px; font-weight: bold; background: white; color: var(--ink-black);">
+                        <option value="Not Paid" ${currentPayment === 'Not Paid' ? 'selected' : ''}>Not Paid</option>
+                        <option value="Paid" ${currentPayment === 'Paid' ? 'selected' : ''}>Paid</option>
                     </select>
                 </td>
                 <td>
@@ -165,6 +172,14 @@ async function loadOrders() {
                         <option value="Coding" ${data.status === 'Coding' ? 'selected' : ''}>Coding</option>
                         <option value="Review" ${data.status === 'Review' ? 'selected' : ''}>Review</option>
                         <option value="Completed" ${data.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                        <option value="Delivered" ${data.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                    </select>
+                </div>
+                <div class="order-field" style="margin-top: 5px; color: var(--ink-black);">
+                    <strong>Payment:</strong>
+                    <select class="admin-payment-select" data-id="${data._id}" style="border: 2px solid var(--ink-black); font-family: inherit; font-size: 0.8rem; padding: 4px; font-weight: bold; background: white; margin-left: 5px; color: var(--ink-black);">
+                        <option value="Not Paid" ${currentPayment === 'Not Paid' ? 'selected' : ''}>Not Paid</option>
+                        <option value="Paid" ${currentPayment === 'Paid' ? 'selected' : ''}>Paid</option>
                     </select>
                 </div>
                 <div class="order-actions" style="margin-top: 10px;">
@@ -178,6 +193,11 @@ async function loadOrders() {
         document.querySelectorAll(".admin-status-select").forEach(select => {
             select.addEventListener("change", (e) => {
                 updateOrderStatus(select.getAttribute("data-id"), e.target.value);
+            });
+        });
+        document.querySelectorAll(".admin-payment-select").forEach(select => {
+            select.addEventListener("change", (e) => {
+                updateOrderPaymentStatus(select.getAttribute("data-id"), e.target.value);
             });
         });
         document.querySelectorAll(".btn-del-order").forEach(btn => {
@@ -774,96 +794,27 @@ if (adminReplyForm) {
 
 
 // ==========================================
-// THEME CONFIGURATION LOGIC
+// PAYMENT UPDATE LOGIC
 // ==========================================
-const themeSettingsForm = document.getElementById("themeSettingsForm");
-const accentColorPicker = document.getElementById("accentColorPicker");
-const accentColorHex = document.getElementById("accentColorHex");
-const bgColorPicker = document.getElementById("bgColorPicker");
-const bgColorHex = document.getElementById("bgColorHex");
-
-async function loadThemeSettingsAdmin() {
+async function updateOrderPaymentStatus(id, newPaymentStatus) {
     try {
-        const res = await fetch("/api/content/theme");
+        const res = await fetch(`/api/orders/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ paymentStatus: newPaymentStatus })
+        });
         if (res.ok) {
-            const data = await res.json();
-            if (data.accentColor) {
-                accentColorPicker.value = data.accentColor;
-                accentColorHex.value = data.accentColor;
-            }
-            if (data.bgColor) {
-                bgColorPicker.value = data.bgColor;
-                bgColorHex.value = data.bgColor;
-            }
+            loadOrders();
+            window.customAlert("Payment status updated successfully.");
+        } else {
+            window.customAlert("Failed to update payment status", true);
         }
-    } catch (e) {
-        console.error("Failed to load theme settings in admin", e);
+    } catch (err) {
+        window.customAlert("Error updating payment status", true);
     }
-}
-
-// Sync color pickers with hex text inputs
-if (accentColorPicker && accentColorHex) {
-    accentColorPicker.addEventListener("input", (e) => {
-        accentColorHex.value = e.target.value;
-    });
-    accentColorHex.addEventListener("input", (e) => {
-        const val = e.target.value;
-        if (/^#[0-9A-F]{6}$/i.test(val)) {
-            accentColorPicker.value = val;
-        }
-    });
-}
-
-if (bgColorPicker && bgColorHex) {
-    bgColorPicker.addEventListener("input", (e) => {
-        bgColorHex.value = e.target.value;
-    });
-    bgColorHex.addEventListener("input", (e) => {
-        const val = e.target.value;
-        if (/^#[0-9A-F]{6}$/i.test(val)) {
-            bgColorPicker.value = val;
-        }
-    });
-}
-
-if (themeSettingsForm) {
-    themeSettingsForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const accentColor = accentColorHex.value;
-        const bgColor = bgColorHex.value;
-        if (!token) return;
-
-        try {
-            const res = await fetch("/api/content/theme", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ accentColor, bgColor })
-            });
-            const data = await res.json();
-            if (res.ok && data.success) {
-                window.customAlert("Theme colors updated successfully! Reloading...");
-                
-                // Cache locally immediately
-                localStorage.setItem("themeAccentColor", accentColor);
-                localStorage.setItem("themeBgColor", bgColor);
-                
-                // Apply immediately
-                document.documentElement.style.setProperty("--accent-pink", accentColor);
-                document.documentElement.style.setProperty("--bg-cream", bgColor);
-                
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else {
-                window.customAlert(data.message || "Failed to save settings", true);
-            }
-        } catch (err) {
-            window.customAlert("Server connection error saving settings", true);
-        }
-    });
 }
 
 // Check admin session on startup

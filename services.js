@@ -153,22 +153,8 @@ function updateUIState() {
 }
 
 async function checkUnreadMessages() {
-    if (!currentUser) return;
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    
-    try {
-        const res = await fetch("/api/messages/unread-count", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        const data = await res.json();
-        const badge = document.getElementById("profileBadge");
-        if (badge) {
-            badge.style.display = data.unreadCount > 0 ? "block" : "none";
-        }
-    } catch (e) {
-        console.error("Failed to check unread messages", e);
-    }
+    const badge = document.getElementById("profileBadge");
+    if (badge) badge.style.display = "none";
 }
 
 // RESTORE USER SESSION
@@ -343,6 +329,7 @@ async function loadPackages() {
     try {
         const res = await fetch("/api/packages");
         const packages = await res.json();
+        window.allPackages = packages;
 
         packagesGrid.innerHTML = "";
         if (orderPackageSelect) orderPackageSelect.innerHTML = "";
@@ -426,11 +413,13 @@ if (orderForm) {
                 closeModal(orderModal);
                 orderForm.reset();
                 
-                // Set price based on selected package
+                // Set price based on selected package dynamically from database
                 let price = "Contact Us";
-                if (data.package.toLowerCase().includes("starter")) price = "$249";
-                else if (data.package.toLowerCase().includes("growth")) price = "$499";
-                else if (data.package.toLowerCase().includes("creative") || data.package.toLowerCase().includes("elite")) price = "$999";
+                const selectedPkgName = data.package;
+                if (window.allPackages) {
+                    const matched = window.allPackages.find(p => p.name === selectedPkgName);
+                    if (matched) price = matched.price;
+                }
                 
                 if (window.downloadInvoicePDF) {
                     window.downloadInvoicePDF(data, price);
@@ -502,6 +491,7 @@ function setupTrackOrder() {
                     else if (order.status === "Coding") activeStep = 3;
                     else if (order.status === "Review") activeStep = 4;
                     else if (order.status === "Completed") activeStep = 5;
+                    else if (order.status === "Delivered") activeStep = 6;
                     
                     const dateStr = new Date(order.timestamp).toLocaleDateString();
 
@@ -509,7 +499,8 @@ function setupTrackOrder() {
                         <div style="margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:10px;">
                             <strong>Package:</strong> ${order.package}<br>
                             <strong>Order Date:</strong> ${dateStr}<br>
-                            <strong>Current Status:</strong> <span style="font-weight:bold; color:var(--accent-pink);">${order.status}</span>
+                            <strong>Current Status:</strong> <span style="font-weight:bold; color:var(--accent-pink);">${order.status}</span> | 
+                            <strong>Payment:</strong> <span style="font-weight:bold; color:${order.paymentStatus === 'Paid' ? '#2ecc71' : '#e74c3c'};">${order.paymentStatus || 'Not Paid'}</span>
                         </div>
                         
                         <div class="stepper" style="display: flex; justify-content: space-between; position: relative; margin-top: 15px; padding: 0 5px;">
@@ -534,6 +525,10 @@ function setupTrackOrder() {
                             <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
                                 <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 5 ? '#dde5b6' : 'white'};">5</div>
                                 <span style="font-size: 0.6rem; font-weight: bold;">Done</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 6 ? '#dde5b6' : 'white'};">6</div>
+                                <span style="font-size: 0.6rem; font-weight: bold;">Delivered</span>
                             </div>
                         </div>
                     `;

@@ -27,8 +27,13 @@ const RequestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Designing', 'Coding', 'Review', 'Completed'],
+    enum: ['Pending', 'Designing', 'Coding', 'Review', 'Completed', 'Delivered'],
     default: 'Pending',
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Not Paid', 'Paid'],
+    default: 'Not Paid',
   },
   timestamp: {
     type: Date,

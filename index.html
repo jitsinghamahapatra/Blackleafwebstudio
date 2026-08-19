@@ -2,32 +2,7 @@
 <html lang="en">
 
 <head>
-    <script>
-        (function() {
-            const accent = localStorage.getItem("themeAccentColor");
-            const bg = localStorage.getItem("themeBgColor");
-            if (accent) document.documentElement.style.setProperty("--accent-pink", accent);
-            if (bg) document.documentElement.style.setProperty("--bg-cream", bg);
-        })();
-        window.loadThemeSettings = async function() {
-            try {
-                const res = await fetch("/api/content/theme");
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.accentColor) {
-                        document.documentElement.style.setProperty("--accent-pink", data.accentColor);
-                        localStorage.setItem("themeAccentColor", data.accentColor);
-                    }
-                    if (data.bgColor) {
-                        document.documentElement.style.setProperty("--bg-cream", data.bgColor);
-                        localStorage.setItem("themeBgColor", data.bgColor);
-                    }
-                }
-            } catch (e) {
-                console.error("Failed to load theme settings", e);
-            }
-        };
-    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -63,96 +38,118 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Set draw color to deep ink black
-            doc.setDrawColor(26, 26, 26);
-            doc.setLineWidth(0.8);
+            // Set draw color to solid black
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.4);
             
-            // Page border (frame)
-            doc.rect(8, 8, 194, 280);
+            // Brand name top-left
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.setTextColor(0, 0, 0);
+            doc.text("BLACKLEAF STUDIO", 20, 30);
             
-            // Header box filled with dynamic theme color
-            const accentColor = localStorage.getItem("themeAccentColor") || "#ffc2d1";
-            function hexToRgb(hex) {
-                const bigint = parseInt(hex.replace("#", ""), 16);
-                return {
-                    r: (bigint >> 16) & 255,
-                    g: (bigint >> 8) & 255,
-                    b: bigint & 255
-                };
-            }
-            const rgb = hexToRgb(accentColor);
-            doc.setFillColor(rgb.r, rgb.g, rgb.b);
-            doc.rect(14, 14, 182, 35, "FD");
+            // INVOICE title top-right
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(28);
+            doc.setTextColor(0, 0, 0);
+            doc.text("INVOICE", 130, 30);
             
-            // Blackleaf title
-            doc.setFont("courier", "bold");
-            doc.setFontSize(22);
-            doc.setTextColor(26, 26, 26);
-            doc.text("BLACKLEAF STUDIO", 20, 28);
+            // Big prominent Invoice ID right below title
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.text("INVoice ID: " + order._id.toUpperCase().substring(0, 8), 130, 40);
             
-            doc.setFont("courier", "italic");
-            doc.setFontSize(9);
-            doc.text("Premium Bespoke Web Design & Hand-Coded Development", 20, 36);
-            doc.text("https://blackleaf.web.app", 20, 42);
-            
-            // Metadata Block (Right side of header)
-            doc.rect(130, 18, 60, 27, "FD");
-            doc.setFillColor(255, 255, 255);
-            doc.setFont("courier", "bold");
+            // Invoice date below ID
+            doc.setFont("helvetica", "normal");
             doc.setFontSize(10);
-            doc.text("INVOICE", 135, 25);
-            doc.setFont("courier", "normal");
-            doc.setFontSize(8);
-            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 135, 31);
-            doc.text("ID: INV-" + order._id.toUpperCase().substring(0, 8), 135, 37);
+            doc.setTextColor(0, 0, 0);
+            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 130, 48);
             
-            // Billed To Box
-            doc.setFillColor(221, 229, 182); // green #dde5b6
-            doc.rect(14, 57, 182, 32, "FD");
-            
-            doc.setFont("courier", "bold");
-            doc.setFontSize(11);
+            // Billed To / From Section
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
             doc.text("BILLED TO:", 20, 65);
-            doc.setFont("courier", "normal");
-            doc.setFontSize(9);
-            doc.text("Client Name:  " + order.name, 20, 73);
-            doc.text("Client Email: " + order.email, 20, 80);
+            doc.setFont("helvetica", "normal");
+            doc.text(order.name, 50, 65);
+            doc.text(order.email, 50, 71);
             
-            // Item Table Box
-            doc.setFillColor(255, 255, 255);
-            doc.rect(14, 97, 182, 100, "FD");
-            doc.line(14, 110, 196, 110); // Table Header separator
+            doc.setFont("helvetica", "bold");
+            doc.text("PAY TO:", 20, 83);
+            doc.setFont("helvetica", "normal");
+            doc.text("Blackleaf Studio", 50, 83);
+            doc.text("jitsinghamahapatra2006@gmail.com", 50, 89);
             
-            doc.setFont("courier", "bold");
-            doc.setFontSize(11);
-            doc.text("ITEM DESCRIPTION", 20, 105);
-            doc.text("TOTAL RATE", 150, 105);
-            
-            doc.setFont("courier", "normal");
+            // Table Section Headers
+            doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
-            doc.text("Package Plan: " + order.package, 20, 120);
+            doc.setTextColor(0, 0, 0);
+            doc.text("DESCRIPTION", 20, 115);
+            doc.text("RATE", 120, 115);
+            doc.text("HOURS", 150, 115);
+            doc.text("AMOUNT", 175, 115);
             
-            const detailsLines = doc.splitTextToSize("Details: " + order.details, 120);
-            doc.text(detailsLines, 20, 130);
+            // Table Line divider
+            doc.line(20, 118, 190, 118);
             
-            // Price column
-            doc.setFont("courier", "bold");
-            doc.setFontSize(12);
-            doc.text(packagePrice || "Contact", 150, 120);
+            // Row 1 - Package name & price
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(order.package + " Plan", 20, 126);
+            doc.text(packagePrice || "Contact", 120, 126);
+            doc.text("1", 150, 126);
+            doc.text(packagePrice || "Contact", 175, 126);
             
-            // Total Box
-            doc.setFillColor(255, 247, 242);
-            doc.rect(14, 207, 182, 20, "FD");
-            doc.setFont("courier", "bold");
+            // Details Subtext
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            const detailsLines = doc.splitTextToSize("Details: " + order.details, 170);
+            
+            let currentY = 132;
+            for (let i = 0; i < detailsLines.length; i++) {
+                if (currentY > 265) {
+                    doc.addPage();
+                    currentY = 25;
+                }
+                doc.text(detailsLines[i], 20, currentY);
+                currentY += 4.5;
+            }
+            
+            const separatorY = currentY + 2;
+            
+            // Check if there is enough space on page for Total and Footer
+            if (separatorY > 240) {
+                doc.addPage();
+                currentY = 25;
+            } else {
+                currentY = separatorY;
+            }
+            
+            // Row divider line
+            doc.setDrawColor(180, 180, 180);
+            doc.line(20, currentY, 190, currentY);
+            
+            // Total row
+            const totalY = currentY + 12;
+            doc.setFont("helvetica", "bold");
             doc.setFontSize(11);
-            doc.text("TOTAL DUE AMOUNT:", 20, 219);
-            doc.text(packagePrice || "Contact for Custom Quote", 130, 219);
+            doc.setTextColor(0, 0, 0);
+            doc.text("TOTAL AMOUNT:", 20, totalY);
+            doc.text(packagePrice || "Contact", 175, totalY);
+            
+            // Final border line under total
+            doc.setDrawColor(0, 0, 0);
+            doc.line(20, totalY + 4, 190, totalY + 4);
             
             // Footer message
-            doc.setFont("courier", "italic");
+            const footerY = totalY + 20;
+            doc.setFont("helvetica", "normal");
             doc.setFontSize(9);
-            doc.text("Thank you for choosing Blackleaf Studio! Your project request is being reviewed.", 14, 245);
-            doc.text("We design for performance. No templates, no builders, pure handcraft.", 14, 251);
+            doc.setTextColor(0, 0, 0);
+            doc.text("Thank you for your business.", 20, footerY);
             
             doc.save("Invoice_" + order._id.substring(0, 8) + ".pdf");
         };

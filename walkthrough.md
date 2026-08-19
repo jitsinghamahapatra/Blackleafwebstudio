@@ -85,6 +85,55 @@ We transitioned the Blackleaf Studio web application from Firebase Firestore to 
 
 ---
 
+## 🆕 Redesign & System Updates (Aug 2026)
+
+### 1. Accent Styling & Theme settings removal
+- Removed the dynamic **Theme Settings** section and form fields from [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html) and [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js).
+- Removed dynamic theme caching and `loadThemeSettings` javascript blocks from the `<head>` of all HTML files (`index.html`, `services.html`, `contact.html`, `portfolio.html`, `profile.html`, `admin.html`).
+- Changed `--accent-pink` globally in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css) to a premium vibrant pink color `#ff758f`.
+
+### 2. Request Tracking ID Search Fix
+- Redesigned the public tracking search route `/api/orders/track/:id` in [`server.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server.js) using a robust string-safe query utilizing MongoDB `$expr` and `$toString`. It now handles both 24-character full `_id` and 8-character partial ID prefix searches (e.g. `INV-64D3065A`) correctly.
+
+### 3. Request Statuses (Delivered) & Payment status (Paid/Unpaid)
+- Added `paymentStatus` field to `Request` model defaulting to `'Not Paid'` in [`Request.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server/models/Request.js).
+- Added `'Delivered'` status to `status` enum options in the database schema.
+- Added a **Payment** column with "Paid" / "Not Paid" dropdown options in the Admin Web Requests table in [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html) and [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js).
+- Added "Delivered" to both status select dropdown lists in the Admin Web Requests panel.
+- Updated progress steppers in the dashboard and Track Order modals across [`app.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/app.js), [`services.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.js), [`portfolio.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/portfolio.js), [`contact.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.js), and [`profile.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js) to support 6 steps (including "Delivered").
+- Displayed payment status beside status labels in the client dashboard requests list and search results.
+
+### 4. Cohesive Invoice PDF Redesign
+- Redesigned `window.downloadInvoicePDF` in [`index.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/index.html), [`services.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.html), and [`profile.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.html):
+  - Removed website URL `https://blackleaf.web.app` from the header.
+  - Replaced the solid black box on the right with a clean white metadata box, removing the black block design error.
+  - Rendered the header background using the premium static pink color `#ff758f`.
+  - Renamed "TOTAL DUE AMOUNT:" to "TOTAL AMOUNT:".
+  - Changed the total box fill color to a light pink shade `#fff0f3` (`255, 240, 243`).
+  - Standardized fonts to Courier.
+- Removed the "Download Invoice" button from the client dashboard requests list in [`profile.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js) so it is downloaded only once upon request creation.
+
+---
+
+### 1. Minimal All-Black Text Invoice
+- Simplified the invoice layout in `downloadInvoicePDF` (`index.html`, `services.html`, `profile.html`) to:
+  - Keep all text strictly **black** (`doc.setTextColor(0, 0, 0)`) with clean black borders and lines.
+  - Display the **`INVoice ID: [ID]`** prominently at the top right in a very large **Helvetica Bold Size 16** font for quick lookup.
+  - Remove all unnecessary layout noise (such as bank details, payment instructions, and mock company addresses), leaving only the essential Billing, Order Package, and Total details.
+
+### 2. Redesigned Client Dashboard Tabs Interface
+- Replaced the cluttered three-panel layout with a responsive, modern Tab Bar interface in [`profile.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.html).
+- Added three interactive tab panels:
+  - **Project Requests**: Displays the list of ordered packages with progress timeline trackers.
+  - **Support Inbox**: The quick reply messages thread.
+  - **Account Settings**: Centered form block to manage user credentials.
+- Configured dynamic tab-toggle state changes in [`profile.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js) and custom neo-brutalist hover/active transition rules in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css).
+
+### 3. Dashboard Quick Reply Form Typing Fix
+- Fixed a bug in [`profile.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js) where clicking inside thread reply text inputs triggered the parent card's click event. The card event listener would mark message threads as read and trigger a full profile re-rendering, causing the input control to lose focus and blow away typing. Added an element check guard to return early when interacting with form input controls.
+
+---
+
 ## 🚀 How to Start the App Locally
 
 1. Open your [`.env`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/.env) file and replace the password placeholder inside `MONGODB_URI` with your actual MongoDB Atlas database password.
@@ -101,4 +150,5 @@ We transitioned the Blackleaf Studio web application from Firebase Firestore to 
      ```bash
      npm run dev
      ```
-4. Access `http://localhost:5173` to test Google registration, Profile edits, theme settings customization, progress steppers, and invoice downloads.
+4. Access `http://localhost:5173` to test Google registration, Profile dashboard, tracking requests, and redesigned invoice downloads.
+

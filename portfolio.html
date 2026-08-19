@@ -1,32 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>
-        (function() {
-            const accent = localStorage.getItem("themeAccentColor");
-            const bg = localStorage.getItem("themeBgColor");
-            if (accent) document.documentElement.style.setProperty("--accent-pink", accent);
-            if (bg) document.documentElement.style.setProperty("--bg-cream", bg);
-        })();
-        window.loadThemeSettings = async function() {
-            try {
-                const res = await fetch("/api/content/theme");
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.accentColor) {
-                        document.documentElement.style.setProperty("--accent-pink", data.accentColor);
-                        localStorage.setItem("themeAccentColor", data.accentColor);
-                    }
-                    if (data.bgColor) {
-                        document.documentElement.style.setProperty("--bg-cream", data.bgColor);
-                        localStorage.setItem("themeBgColor", data.bgColor);
-                    }
-                }
-            } catch (e) {
-                console.error("Failed to load theme settings", e);
-            }
-        };
-    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackleaf - Portfolio & Client Works</title>

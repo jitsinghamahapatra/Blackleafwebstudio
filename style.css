@@ -5,7 +5,7 @@
     --bg-cream: #f9f7f2;
     --ink-black: #1a1a1a;
     --ink-blue: #2c3e50;
-    --accent-pink: #ffc2d1;
+    --accent-pink: #04a5a8aa;
     --accent-green: #dde5b6;
     --accent-brown: #d4a373;
 }
@@ -1159,7 +1159,7 @@ label {
 .faq-answer p {
     font-size: 0.9rem;
     line-height: 1.7;
-    color: #444;
+    color: #a8a8a8;
     padding-bottom: 20px;
 }
 
@@ -1341,4 +1341,35 @@ label {
     100% {
         box-shadow: 0 0 0 0 rgba(255, 0, 85, 0);
     }
+}
+
+/* Scrollbar Styling for Scrollable Containers */
+#requestsList::-webkit-scrollbar,
+#messagesList::-webkit-scrollbar {
+    width: 8px;
+}
+#requestsList::-webkit-scrollbar-track,
+#messagesList::-webkit-scrollbar-track {
+    background: #ffffff;
+    border: 2px solid var(--ink-black);
+}
+#requestsList::-webkit-scrollbar-thumb,
+#messagesList::-webkit-scrollbar-thumb {
+    background: var(--accent-pink);
+    border: 1px solid var(--ink-black);
+}
+
+/* Dashboard Tab Buttons */
+.tab-btn {
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.15s ease !important;
+}
+.tab-btn:hover {
+    background-color: var(--accent-pink) !important;
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0 var(--ink-black) !important;
+}
+.tab-btn.active {
+    background-color: var(--accent-pink) !important;
+    transform: translate(2px, 2px) !important;
+    box-shadow: 2px 2px 0 var(--ink-black) !important;
 }

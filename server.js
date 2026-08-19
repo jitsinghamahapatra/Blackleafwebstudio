@@ -383,11 +383,15 @@ app.post('/api/orders', auth, async (req, res) => {
 });
 
 app.put('/api/orders/:id', auth, admin, async (req, res) => {
-  const { status } = req.body;
+  const { status, paymentStatus } = req.body;
   try {
+    const updateFields = {};
+    if (status !== undefined) updateFields.status = status;
+    if (paymentStatus !== undefined) updateFields.paymentStatus = paymentStatus;
+
     const request = await Request.findByIdAndUpdate(
       req.params.id,
-      { status },
+      updateFields,
       { new: true }
     );
     res.json(request);
@@ -423,9 +427,21 @@ app.get('/api/orders/track/:id', async (req, res) => {
   }
   
   try {
-    const order = await Request.findOne({ 
-      _id: { $regex: '^' + searchId, $options: 'i' } 
-    });
+    let order = null;
+    if (searchId.length === 24) {
+      order = await Request.findById(searchId);
+    }
+    if (!order) {
+      order = await Request.findOne({
+        $expr: {
+          $regexMatch: {
+            input: { $toString: "$_id" },
+            regex: '^' + searchId,
+            options: 'i'
+          }
+        }
+      });
+    }
     
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
@@ -437,6 +453,7 @@ app.get('/api/orders/track/:id', async (req, res) => {
         _id: order._id,
         package: order.package,
         status: order.status,
+        paymentStatus: order.paymentStatus || 'Not Paid',
         timestamp: order.timestamp
       }
     });

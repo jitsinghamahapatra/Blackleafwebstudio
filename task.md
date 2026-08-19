@@ -36,3 +36,22 @@
   - [x] Visual Order Stepper Timeline Tracker (placed in Client Dashboard requests list and global search Track Order Modal)
   - [x] Multi-Stage Admin Order Status Dropdowns (dropdown select inputs to update order status stages live)
 
+- [x] Checklist for New Redesign & System Updates
+  - [x] Update `Request.js` schema with `paymentStatus` and `'Delivered'` status option
+  - [x] Update `server.js` route PUT `/api/orders/:id` and tracking query `/api/orders/track/:id`
+  - [x] Update global `--accent-pink` in `style.css` to `#ff758f`
+  - [x] Remove Theme Settings tab from `admin.html` and `admin.js`
+  - [x] Remove dynamic `loadThemeSettings` script blocks from all HTML pages (index, services, contact, portfolio, profile, admin)
+  - [x] Add Payment Status column in `admin.html` Requests table
+  - [x] Update `admin.js` to render Payment status select dropdown and handle status changes
+  - [x] Remove invoice download button from requests list in `profile.js`
+  - [x] Update progress stepper steps to 6 (including "Delivered") in `profile.js`, `services.js`, `portfolio.js`, `contact.js`, `app.js`
+  - [x] Redesign `downloadInvoicePDF` in `index.html`, `services.html`, `profile.html` (remove website link, fix black box, rename/style total box)
+
+- [x] Checklist for Redesign Details & Profile Layout Issues (Aug 19, 2026)
+  - [x] Change the accent theme color from pink to slate gray (#7f8c8d) globally
+  - [x] Format Invoice ID in big bold text as `INVoice ID: [ID]` in metadata block
+  - [x] Retrieve package prices dynamically from backend instead of hardcoding old price strings
+  - [x] Disable unread support messages badges/banners to turn off notifications
+  - [x] Fix dashboard page length layout by setting scrollable containers with custom scrollbars
+

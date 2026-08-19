@@ -1,32 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>
-        (function() {
-            const accent = localStorage.getItem("themeAccentColor");
-            const bg = localStorage.getItem("themeBgColor");
-            if (accent) document.documentElement.style.setProperty("--accent-pink", accent);
-            if (bg) document.documentElement.style.setProperty("--bg-cream", bg);
-        })();
-        window.loadThemeSettings = async function() {
-            try {
-                const res = await fetch("/api/content/theme");
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.accentColor) {
-                        document.documentElement.style.setProperty("--accent-pink", data.accentColor);
-                        localStorage.setItem("themeAccentColor", data.accentColor);
-                    }
-                    if (data.bgColor) {
-                        document.documentElement.style.setProperty("--bg-cream", data.bgColor);
-                        localStorage.setItem("themeBgColor", data.bgColor);
-                    }
-                }
-            } catch (e) {
-                console.error("Failed to load theme settings", e);
-            }
-        };
-    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackleaf - Client Dashboard</title>
@@ -41,58 +16,118 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Design a clean, premium invoice
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(22);
-            doc.text("BLACKLEAF STUDIO", 14, 25);
+            // Set draw color to solid black
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.4);
             
+            // Brand name top-left
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.setTextColor(0, 0, 0);
+            doc.text("BLACKLEAF STUDIO", 20, 30);
+            
+            // INVOICE title top-right
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(28);
+            doc.setTextColor(0, 0, 0);
+            doc.text("INVOICE", 130, 30);
+            
+            // Big prominent Invoice ID right below title
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.text("INVoice ID: " + order._id.toUpperCase().substring(0, 8), 130, 40);
+            
+            // Invoice date below ID
+            doc.setFont("helvetica", "normal");
             doc.setFontSize(10);
-            doc.setFont("Helvetica", "normal");
-            doc.text("Premium Bespoke Web Design & Hand-Coded Development", 14, 30);
+            doc.setTextColor(0, 0, 0);
+            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 130, 48);
             
-            // Metadata block
+            // Billed To / From Section
+            doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
-            doc.text("Date: " + new Date(order.timestamp || Date.now()).toLocaleDateString(), 140, 20);
-            doc.text("Invoice ID: INV-" + order._id.toUpperCase().substring(0, 8), 140, 26);
+            doc.setTextColor(0, 0, 0);
+            doc.text("BILLED TO:", 20, 65);
+            doc.setFont("helvetica", "normal");
+            doc.text(order.name, 50, 65);
+            doc.text(order.email, 50, 71);
             
-            doc.line(14, 35, 196, 35);
+            doc.setFont("helvetica", "bold");
+            doc.text("PAY TO:", 20, 83);
+            doc.setFont("helvetica", "normal");
+            doc.text("Blackleaf Studio", 50, 83);
+            doc.text("jitsinghamahapatra2006@gmail.com", 50, 89);
             
-            // Billed To
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(12);
-            doc.text("BILLED TO:", 14, 45);
-            doc.setFont("Helvetica", "normal");
+            // Table Section Headers
+            doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
-            doc.text("Client Name: " + order.name, 14, 52);
-            doc.text("Client Email: " + order.email, 14, 58);
+            doc.setTextColor(0, 0, 0);
+            doc.text("DESCRIPTION", 20, 115);
+            doc.text("RATE", 120, 115);
+            doc.text("HOURS", 150, 115);
+            doc.text("AMOUNT", 175, 115);
             
-            doc.line(14, 65, 196, 65);
+            // Table Line divider
+            doc.line(20, 118, 190, 118);
             
-            // Item details
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(12);
-            doc.text("PROJECT DESCRIPTION", 14, 75);
-            
-            doc.setFont("Helvetica", "normal");
+            // Row 1 - Package name & price
+            doc.setFont("helvetica", "normal");
             doc.setFontSize(10);
-            doc.text("Package Plan: " + order.package, 14, 85);
+            doc.setTextColor(0, 0, 0);
+            doc.text(order.package + " Plan", 20, 126);
+            doc.text(packagePrice || "Contact", 120, 126);
+            doc.text("1", 150, 126);
+            doc.text(packagePrice || "Contact", 175, 126);
             
-            const detailsLines = doc.splitTextToSize("Details: " + order.details, 180);
-            doc.text(detailsLines, 14, 92);
+            // Details Subtext
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            const detailsLines = doc.splitTextToSize("Details: " + order.details, 170);
             
-            const detailsHeight = detailsLines.length * 5;
-            const totalY = 92 + detailsHeight + 15;
+            let currentY = 132;
+            for (let i = 0; i < detailsLines.length; i++) {
+                if (currentY > 265) {
+                    doc.addPage();
+                    currentY = 25;
+                }
+                doc.text(detailsLines[i], 20, currentY);
+                currentY += 4.5;
+            }
             
-            doc.line(14, totalY, 196, totalY);
+            const separatorY = currentY + 2;
             
-            // Price
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("TOTAL AMOUNT: " + (packagePrice || "Contact for Custom Quote"), 14, totalY + 12);
+            // Check if there is enough space on page for Total and Footer
+            if (separatorY > 240) {
+                doc.addPage();
+                currentY = 25;
+            } else {
+                currentY = separatorY;
+            }
             
-            doc.setFontSize(10);
-            doc.setFont("Helvetica", "italic");
-            doc.text("Thank you for choosing Blackleaf Studio! Your project request is being reviewed.", 14, totalY + 25);
+            // Row divider line
+            doc.setDrawColor(180, 180, 180);
+            doc.line(20, currentY, 190, currentY);
+            
+            // Total row
+            const totalY = currentY + 12;
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text("TOTAL AMOUNT:", 20, totalY);
+            doc.text(packagePrice || "Contact", 175, totalY);
+            
+            // Final border line under total
+            doc.setDrawColor(0, 0, 0);
+            doc.line(20, totalY + 4, 190, totalY + 4);
+            
+            // Footer message
+            const footerY = totalY + 20;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            doc.text("Thank you for your business.", 20, footerY);
             
             doc.save("Invoice_" + order._id.substring(0, 8) + ".pdf");
         };
@@ -133,63 +168,77 @@
         <p>Manage your account settings, project requests, and support messages.</p>
     </section>
 
-    <!-- DASHBOARD SPLIT CONTAINER -->
-    <div class="contact-container anim-fade-up" style="max-width: 1200px; margin: 0 auto 80px auto; gap: 40px; display: flex; flex-wrap: wrap;">
+    <!-- DASHBOARD TABS BAR -->
+    <div class="dashboard-tabs anim-fade-up" style="display: flex; justify-content: center; gap: 15px; margin: 0 auto 30px auto; max-width: 1000px; padding: 0 20px; flex-wrap: wrap;">
+        <button class="tab-btn active" data-tab="requests" style="font-family: inherit; font-weight: bold; font-size: 0.95rem; padding: 12px 24px; border: 3px solid var(--ink-black); background: var(--accent-pink); cursor: pointer; box-shadow: 4px 4px 0 var(--ink-black); transform: translate(2px, 2px); transition: all 0.15s; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-list-check"></i> Project Requests
+        </button>
+        <button class="tab-btn" data-tab="support" style="font-family: inherit; font-weight: bold; font-size: 0.95rem; padding: 12px 24px; border: 3px solid var(--ink-black); background: white; cursor: pointer; box-shadow: 4px 4px 0 var(--ink-black); transition: all 0.15s; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-comments"></i> Support Inbox
+        </button>
+        <button class="tab-btn" data-tab="settings" style="font-family: inherit; font-weight: bold; font-size: 0.95rem; padding: 12px 24px; border: 3px solid var(--ink-black); background: white; cursor: pointer; box-shadow: 4px 4px 0 var(--ink-black); transition: all 0.15s; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-user-gear"></i> Account Settings
+        </button>
+    </div>
+
+    <!-- TABS CONTENT CONTAINER -->
+    <div class="contact-container anim-fade-up" style="max-width: 1000px; margin: 0 auto 80px auto; padding: 0 20px;">
         
-        <!-- Left Side: Profile Form -->
-        <div class="contact-form-container" style="flex: 1; min-width: 320px;">
-            <h3>Account Settings</h3>
-            <form id="profileForm">
-                <label>Email Address (Cannot change):</label>
-                <input type="email" id="profileEmail" class="form-input" readonly disabled style="background-color: #eee; cursor: not-allowed; margin-bottom: 15px;">
-
-                <label>Full Name:</label>
-                <input type="text" id="profileName" class="form-input" placeholder="Full Name" required style="margin-bottom: 15px;">
-
-                <label>Phone Number:</label>
-                <input type="text" id="profilePhone" class="form-input" placeholder="Phone Number" required style="margin-bottom: 15px;">
-
-                <label>Old Password (Required to change password):</label>
-                <div class="password-input-wrapper" style="margin-bottom: 15px;">
-                    <input type="password" id="profileOldPassword" class="form-input" placeholder="Current Password">
-                    <i class="fa-solid fa-eye password-toggle-icon" id="toggleOldPassword"></i>
-                </div>
-
-                <label>New Password (Leave blank to keep current):</label>
-                <div class="password-input-wrapper" style="margin-bottom: 15px;">
-                    <input type="password" id="profilePassword" class="form-input" placeholder="New Password">
-                    <i class="fa-solid fa-eye password-toggle-icon" id="toggleNewPassword"></i>
-                </div>
-
-                <label>Confirm New Password:</label>
-                <div class="password-input-wrapper" style="margin-bottom: 20px;">
-                    <input type="password" id="profileConfirmPassword" class="form-input" placeholder="Confirm New Password">
-                    <i class="fa-solid fa-eye password-toggle-icon" id="toggleConfirmPassword"></i>
-                </div>
-
-                <button type="submit" id="profileSubmitBtn" class="btn-request" style="width: 100%; padding: 12px;">Update Profile</button>
-            </form>
-        </div>
-
-        <!-- Right Side: Dashboard Lists -->
-        <div style="flex: 1.5; min-width: 320px; display: flex; flex-direction: column; gap: 30px;">
-            
-            <!-- Project Requests History -->
-            <div class="contact-form-container" style="width: 100%;">
-                <h3>Project Requests</h3>
-                <div id="requestsList" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+        <!-- Panel 1: Project Requests -->
+        <div id="tab-requests" class="tab-panel" style="width: 100%;">
+            <div class="contact-form-container" style="width: 100%; box-sizing: border-box;">
+                <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-list-check"></i> My Project Requests</h3>
+                <div id="requestsList" style="display: flex; flex-direction: column; gap: 20px; max-height: 550px; overflow-y: auto; padding-right: 8px;">
                     <p style="opacity: 0.6; font-style: italic;">Loading requests...</p>
                 </div>
             </div>
+        </div>
 
-            <!-- Messages Support Inbox -->
-            <div class="contact-form-container" style="width: 100%;">
-                <h3>Support Messages</h3>
-                <div id="messagesList" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+        <!-- Panel 2: Support Inbox -->
+        <div id="tab-support" class="tab-panel" style="width: 100%; display: none;">
+            <div class="contact-form-container" style="width: 100%; box-sizing: border-box;">
+                <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-comments"></i> Support Inbox</h3>
+                <div id="messagesList" style="display: flex; flex-direction: column; gap: 20px; max-height: 550px; overflow-y: auto; padding-right: 8px;">
                     <p style="opacity: 0.6; font-style: italic;">Loading messages...</p>
                 </div>
             </div>
+        </div>
 
+        <!-- Panel 3: Account Settings -->
+        <div id="tab-settings" class="tab-panel" style="width: 100%; display: none; max-width: 600px; margin: 0 auto;">
+            <div class="contact-form-container" style="width: 100%; box-sizing: border-box;">
+                <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-user-gear"></i> Account Settings</h3>
+                <form id="profileForm">
+                    <label>Email Address (Cannot change):</label>
+                    <input type="email" id="profileEmail" class="form-input" readonly disabled style="background-color: #eee; cursor: not-allowed; margin-bottom: 15px;">
+
+                    <label>Full Name:</label>
+                    <input type="text" id="profileName" class="form-input" placeholder="Full Name" required style="margin-bottom: 15px;">
+
+                    <label>Phone Number:</label>
+                    <input type="text" id="profilePhone" class="form-input" placeholder="Phone Number" required style="margin-bottom: 15px;">
+
+                    <label>Old Password (Required to change password):</label>
+                    <div class="password-input-wrapper" style="margin-bottom: 15px;">
+                        <input type="password" id="profileOldPassword" class="form-input" placeholder="Current Password">
+                        <i class="fa-solid fa-eye password-toggle-icon" id="toggleOldPassword"></i>
+                    </div>
+
+                    <label>New Password (Leave blank to keep current):</label>
+                    <div class="password-input-wrapper" style="margin-bottom: 15px;">
+                        <input type="password" id="profilePassword" class="form-input" placeholder="New Password">
+                        <i class="fa-solid fa-eye password-toggle-icon" id="toggleNewPassword"></i>
+                    </div>
+
+                    <label>Confirm New Password:</label>
+                    <div class="password-input-wrapper" style="margin-bottom: 20px;">
+                        <input type="password" id="profileConfirmPassword" class="form-input" placeholder="Confirm New Password">
+                        <i class="fa-solid fa-eye password-toggle-icon" id="toggleConfirmPassword"></i>
+                    </div>
+
+                    <button type="submit" id="profileSubmitBtn" class="btn-request" style="width: 100%; padding: 12px;">Update Profile</button>
+                </form>
+            </div>
         </div>
 
     </div>

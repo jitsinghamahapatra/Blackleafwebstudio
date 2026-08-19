@@ -304,25 +304,21 @@ function renderRequestsList(requests) {
         const isCompleted = req.status === "Completed";
         const badgeBg = isCompleted ? "#e1ffd4" : "#ffe4cc";
         const dateStr = new Date(req.timestamp).toLocaleDateString();
-        
-        // Match package price
-        let price = "Contact Us";
-        if (req.package.toLowerCase().includes("starter")) price = "$249";
-        else if (req.package.toLowerCase().includes("growth")) price = "$499";
-        else if (req.package.toLowerCase().includes("creative") || req.package.toLowerCase().includes("elite")) price = "$999";
-
         let activeStep = 1;
         if (req.status === "Pending") activeStep = 1;
         else if (req.status === "Designing") activeStep = 2;
         else if (req.status === "Coding") activeStep = 3;
         else if (req.status === "Review") activeStep = 4;
         else if (req.status === "Completed") activeStep = 5;
+        else if (req.status === "Delivered") activeStep = 6;
+
+        const paymentStatusHtml = `| <span style="font-size: 0.8rem; font-weight: bold; color: ${req.paymentStatus === 'Paid' ? '#2ecc71' : '#e74c3c'}; text-transform: uppercase;">${req.paymentStatus || 'Not Paid'}</span>`;
 
         return `
             <div class="request-card" style="border: 2px solid var(--ink-black); padding: 15px; background: var(--bg-cream); box-shadow: 4px 4px 0 var(--ink-black); margin-bottom: 5px; display: flex; flex-direction: column;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center;">
                     <strong style="font-size: 1.1rem; font-family: 'Space Mono', monospace;">${req.package}</strong>
-                    <span style="font-size: 0.8rem; background: ${badgeBg}; border: 1px solid var(--ink-black); padding: 2px 8px; font-weight: bold; text-transform: uppercase;">${req.status}</span>
+                    <span style="font-size: 0.8rem; background: ${badgeBg}; border: 1px solid var(--ink-black); padding: 2px 8px; font-weight: bold; text-transform: uppercase;">${req.status} ${paymentStatusHtml}</span>
                 </div>
                 <p style="font-size: 0.85rem; margin-bottom: 12px; color: var(--ink-black);"><strong>Details:</strong> ${req.details}</p>
                 
@@ -352,34 +348,19 @@ function renderRequestsList(requests) {
                             <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 5 ? '#dde5b6' : 'white'};">5</div>
                             <span style="font-size: 0.6rem; font-weight: bold;">Done</span>
                         </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-black); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; background: ${activeStep >= 6 ? '#dde5b6' : 'white'};">6</div>
+                            <span style="font-size: 0.6rem; font-weight: bold;">Delivered</span>
+                        </div>
                     </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; opacity: 0.8; flex-wrap: wrap; gap: 10px; border-top: 1px dashed #bbb; padding-top: 10px; margin-top: auto;">
                     <span>Date: ${dateStr}</span>
-                    <button class="btn-request btn-download-invoice" data-id="${req._id}" data-package="${req.package}" data-price="${price}" data-details="${req.details.replace(/"/g, '&quot;')}" data-name="${req.name.replace(/"/g, '&quot;')}" data-email="${req.email}" data-timestamp="${req.timestamp}" style="padding: 5px 12px; font-size: 0.75rem; cursor: pointer; display: inline-block;">Download Invoice</button>
                 </div>
             </div>
         `;
     }).join("");
-
-    // Wire up download buttons
-    list.querySelectorAll(".btn-download-invoice").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const req = {
-                _id: btn.dataset.id,
-                package: btn.dataset.package,
-                details: btn.dataset.details,
-                name: btn.dataset.name,
-                email: btn.dataset.email,
-                timestamp: btn.dataset.timestamp
-            };
-            const price = btn.dataset.price;
-            if (window.downloadInvoicePDF) {
-                window.downloadInvoicePDF(req, price);
-            }
-        });
-    });
 }
 
 function renderMessagesList(messages) {
@@ -450,7 +431,10 @@ function renderMessagesList(messages) {
         const id = card.dataset.id;
         
         // Mark as read when clicked/interacted
-        card.addEventListener("click", async () => {
+        card.addEventListener("click", async (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('form')) {
+                return;
+            }
             const dot = card.querySelector("span[title='Unread Reply']");
             if (dot) {
                 try {
@@ -507,21 +491,9 @@ function renderMessagesList(messages) {
 
 // CHECK UNREAD MESSAGES BADGES
 async function checkUnreadMessages() {
-    if (!currentUser) return;
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    
-    try {
-        const res = await fetch("/api/messages/unread-count", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        const data = await res.json();
-        const badge = document.getElementById("profileBadge");
-        if (badge) {
-            badge.style.display = data.unreadCount > 0 ? "block" : "none";
-        }
-    } catch (e) {
-        console.error("Failed to check unread messages", e);
+    const badge = document.getElementById("profileBadge");
+    if (badge) {
+        badge.style.display = "none";
     }
 }
 
@@ -642,10 +614,30 @@ if (emailAuthBtn) {
     });
 }
 
+function setupDashboardTabs() {
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanels = document.querySelectorAll(".tab-panel");
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            tabButtons.forEach(b => b.classList.remove("active"));
+            tabPanels.forEach(p => p.style.display = "none");
+
+            btn.classList.add("active");
+            const target = btn.dataset.tab;
+            const targetPanel = document.getElementById(`tab-${target}`);
+            if (targetPanel) {
+                targetPanel.style.display = "block";
+            }
+        });
+    });
+}
+
 async function init() {
     if (window.loadThemeSettings) await window.loadThemeSettings();
     await restoreSession();
     setupTrackOrder();
+    setupDashboardTabs();
 }
 
 // ==========================================
