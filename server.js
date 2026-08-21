@@ -34,17 +34,60 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch(err => console.error('MongoDB connection error:', err));
+const connectDB = async () => {
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+  if (mongoose.connection.readyState === 2) {
+    // Wait for the connection to be established
+    await new Promise((resolve) => {
+      const onConnected = () => {
+        cleanup();
+        resolve();
+      };
+      const onError = () => {
+        cleanup();
+        resolve();
+      };
+      const cleanup = () => {
+        mongoose.connection.removeListener('connected', onConnected);
+        mongoose.connection.removeListener('error', onError);
+      };
+      mongoose.connection.once('connected', onConnected);
+      mongoose.connection.once('error', onError);
+      
+      // Safety timeout: 8 seconds
+      setTimeout(() => {
+        cleanup();
+        resolve();
+      }, 8000);
+    });
+    return mongoose.connection;
+  }
+  
+  // If disconnected (readyState 0), initiate connection
+  return mongoose.connect(MONGODB_URI);
+};
+
+// Initial connection attempt (runs in background for normal node servers)
+connectDB().catch(err => console.error('Initial MongoDB connection error:', err));
 
 // Database connection status check endpoint
-app.get('/api/db-status', (req, res) => {
-  const isConnected = mongoose.connection.readyState === 1;
-  res.json({
-    connected: isConnected,
-    status: isConnected ? 'connected' : 'disconnected'
-  });
+app.get('/api/db-status', async (req, res) => {
+  try {
+    await connectDB();
+    const isConnected = mongoose.connection.readyState === 1;
+    res.json({
+      connected: isConnected,
+      status: isConnected ? 'connected' : 'disconnected'
+    });
+  } catch (err) {
+    res.json({
+      connected: false,
+      status: 'disconnected',
+      error: err.message
+    });
+  }
 });
 
 // Helpers
@@ -657,7 +700,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // Start Server (only if not running on Vercel serverless)
 if (!process.env.VERCEL) {
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
   });
 }

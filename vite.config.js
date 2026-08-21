@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.FIREBASE_MEASUREMENT_ID': JSON.stringify(env.FIREBASE_MEASUREMENT_ID)
     },
     server: {
+      host: '0.0.0.0',
       proxy: {
         '/api': {
           target: 'http://127.0.0.1:5000',
