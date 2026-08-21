@@ -140,6 +140,18 @@
     </script>
 </head>
 <body>
+    <!-- DB Connection Loading Screen -->
+    <div id="db-loading-screen" class="loading-overlay">
+        <div class="loading-box">
+            <div class="loading-logo">
+                <i class="fa-solid fa-leaf animate-leaf"></i>
+                <span class="logo-text">Blackleaf</span>
+            </div>
+            <div class="loader"></div>
+            <p id="db-loading-status" class="loading-status">Connecting to secure database...</p>
+            <button id="db-retry-btn" class="btn-retry" style="display: none;" onclick="window.location.reload()">Retry Connection</button>
+        </div>
+    </div>
 
     <nav>
         <div class="nav-logo handwritten"> <a href="index.html">Blackleaf</a></div>
@@ -276,8 +288,9 @@
                 </div>
                 <div class="footer-col">
                     <h5>Legal</h5>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Use</a>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms & Conditions</a>
+                    <a href="refund.html">Refund Policy</a>
                 </div>
             </div>
         </div>

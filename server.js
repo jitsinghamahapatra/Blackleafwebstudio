@@ -38,6 +38,15 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.error('MongoDB connection error:', err));
 
+// Database connection status check endpoint
+app.get('/api/db-status', (req, res) => {
+  const isConnected = mongoose.connection.readyState === 1;
+  res.json({
+    connected: isConnected,
+    status: isConnected ? 'connected' : 'disconnected'
+  });
+});
+
 // Helpers
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '30d' });

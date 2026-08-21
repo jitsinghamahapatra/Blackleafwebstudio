@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blackleaf - Portfolio & Client Works</title>
-    <meta name="description" content="Browse recent work and hand-coded website designs crafted for startups, creators, and businesses by Blackleaf Studio.">
+    <title>Privacy Policy - Blackleaf</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -35,61 +33,34 @@
             <a href="services.html" style="text-decoration: none; color: inherit;">Services</a>
             <a href="contact.html" style="text-decoration: none; color: inherit;">Contact</a>
             <a href="#" id="trackOrderNav" style="text-decoration: none; color: inherit; font-weight: bold;"><i class="fa-solid fa-magnifying-glass"></i> Track Order</a>
-            <a href="admin.html" id="adminNav"
-                style="display: none; text-decoration: none; color: inherit; font-weight: bold;"><i
-                    class="fa-solid fa-lock"></i> Admin</a>
+            <a href="admin.html" id="adminNav" style="display: none; text-decoration: none; color: inherit; font-weight: bold;"><i class="fa-solid fa-lock"></i> Admin</a>
             <a href="profile.html" id="profileBtn" class="btn-request btn-outline" style="display: none; text-decoration: none; padding: 10px 20px; font-size: 0.8rem; font-weight: bold; position: relative;">
                 <i class="fa-solid fa-user"></i> Profile
                 <span id="profileBadge" style="display: none; position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; background-color: #ff0055; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px #ff0055; animation: pulse-badge 1.5s infinite;"></span>
             </a>
-            <button id="authBtn" class="btn-request btn-outline"
-                style="padding: 10px 20px; font-size: 0.8rem;">Login</button>
+            <button id="authBtn" class="btn-request btn-outline" style="padding: 10px 20px; font-size: 0.8rem;">Login</button>
         </div>
         <div class="nav-overlay" id="navOverlay"></div>
     </nav>
 
     <div id="clickRippleContainer"></div>
 
-    <section class="subpage-hero anim-fade-up">
-        <h1 id="pageIntroTitle">OUR PORTFOLIO</h1>
-        <p id="pageIntroDesc">A gallery of real-time custom hand-coded websites. Direct, lightweight, and blazing fast.</p>
-    </section>
-
-    <!-- PORTFOLIO FILTER BUTTONS -->
-    <div class="portfolio-filters anim-fade-up">
-        <button class="filter-btn active" data-filter="all">All Works</button>
-        <button class="filter-btn" data-filter="landing">Landing Pages</button>
-        <button class="filter-btn" data-filter="corporate">Corporate</button>
-        <button class="filter-btn" data-filter="ecommerce">E-Commerce</button>
-    </div>
-
-    <!-- PROJECTS GALLERY GRID -->
-    <section class="portfolio-grid-section anim-fade-up">
-        <div class="portfolio-grid" id="portfolioGrid">
-            <p style="text-align: center; grid-column: 1/-1; opacity:0.6; font-style:italic;">Loading projects...</p>
+    <main class="policy-wrapper anim-fade-up" style="max-width: 800px; margin: 120px auto 80px; padding: 0 20px;">
+        <h1 id="policy-title" class="policy-title" style="font-size: 3rem; margin-bottom: 20px; text-transform: uppercase;">Privacy Policy</h1>
+        <div id="policy-content" class="policy-content" style="font-size: 1.1rem; line-height: 1.8; color: #444;">
+            <!-- Content loaded dynamically -->
         </div>
-    </section>
+    </main>
 
-    <footer class="anim-fade-up">
-        <div class="footer-wrapper">
+    <footer class="footer">
+        <div class="footer-container">
             <div class="footer-brand">
-                <a href="index.html" class="footer-logo">
-                    Blackleaf <span>★</span>
-                </a>
-                <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.6;">
-                    Professional, organic, and hand-coded websites for your business. Let's make something cool.
-                </p>
-                <small class="copyright">&copy; 2026 Blackleaf Studio. All rights reserved.</small>
+                <h4 class="handwritten">Blackleaf</h4>
+                <p>We build professional, bespoke web solutions for businesses and individuals.</p>
+                <p class="copyright">&copy; 2026 Blackleaf Studio. All rights reserved.</p>
             </div>
-            <div class="footer-nav">
+            <div class="footer-links">
                 <div class="footer-col">
-                    <h5>Services</h5>
-                    <a href="services.html">UI Design</a>
-                    <a href="services.html">Web Development</a>
-                    <a href="services.html">SEO Solutions</a>
-                </div>
-                <div class="footer-col">
-                    <h5>Navigation</h5>
                     <a href="index.html">Home</a>
                     <a href="services.html">Services</a>
                     <a href="portfolio.html">Portfolio</a>
@@ -105,7 +76,7 @@
         </div>
     </footer>
 
-    <!-- MODALS -->
+    <!-- MODALS and global authentication logic -->
     <!-- Authentication Modal -->
     <div id="authModal" class="modal-overlay">
         <div class="modal-box">
@@ -113,10 +84,8 @@
             <h2 id="authModalTitle">Log In</h2>
             <p style="margin-bottom: 20px;">Access your client dashboard.</p>
             <div class="auth-methods">
-                <button id="googleAuthBtn" class="btn-request"
-                    style="width:100%; background:white; color:var(--ink-black); border:2px solid var(--ink-black); margin-bottom:15px;">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                        style="width:20px; vertical-align:middle; margin-right:10px;" alt="Google"> Continue with Google
+                <button id="googleAuthBtn" class="btn-request" style="width:100%; background:white; color:var(--ink-black); border:2px solid var(--ink-black); margin-bottom:15px;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px; vertical-align:middle; margin-right:10px;" alt="Google"> Continue with Google
                 </button>
                 <div style="text-align:center; margin:10px 0; font-weight:bold;">— OR —</div>
                 <input type="email" id="authEmail" class="form-input" placeholder="Email Address">
@@ -138,37 +107,38 @@
             <form id="completeRegForm">
                 <label>Email Address:</label>
                 <input type="email" id="regEmail" class="form-input" readonly disabled style="background-color: #eee; cursor: not-allowed;">
+                
                 <label>Full Name:</label>
                 <input type="text" id="regName" class="form-input" placeholder="Full Name" required>
+                
                 <label>Phone Number:</label>
                 <input type="text" id="regPhone" class="form-input" placeholder="Phone Number" required>
-                <label>Password (for future logins):</label>
+                
+                <label>Password (for future email/pass logins):</label>
                 <input type="password" id="regPassword" class="form-input" placeholder="Password" required>
+                
                 <button type="submit" id="completeRegSubmitBtn" class="btn-request" style="width:100%; margin-top: 15px;">Complete Registration</button>
             </form>
         </div>
     </div>
 
-
-
     <!-- Track Order Modal -->
     <div id="trackOrderModal" class="modal-overlay">
         <div class="modal-box" style="max-width: 500px;">
             <button class="modal-close" id="closeTrackOrderModal"><i class="fa-solid fa-xmark"></i></button>
-            <h2 style="font-family: 'Space Mono', monospace; font-size: 1.5rem; margin-top:0;">Track Your Project</h2>
-            <p style="margin-bottom: 20px; opacity:0.8;">Enter your Invoice ID (e.g. INV-XXXX) to track real-time build progress.</p>
-            
-            <div style="display:flex; gap:10px; margin-bottom: 20px;">
-                <input type="text" id="trackOrderIdInput" class="form-input" placeholder="Invoice ID (e.g. INV-64D3065A)" style="flex:1; border:2px solid var(--ink-black); padding: 8px 12px; font-family:inherit; background: transparent;">
-                <button id="btnTrackSubmit" class="btn-request" style="padding: 8px 20px;">Track</button>
-            </div>
-            
-            <div id="trackOrderResult" style="display:none; border:2px dashed var(--ink-black); padding:15px; background:#fafafa; color: var(--ink-black);">
+            <h2>Track Your Order</h2>
+            <p style="margin-bottom: 20px;">Enter your Invoice ID to trace current progress.</p>
+            <form id="trackOrderForm">
+                <input type="text" id="trackOrderIdInput" class="form-input" placeholder="e.g. INV-64b5f..." required>
+                <button type="submit" class="btn-request" style="width:100%; margin-top: 15px;">Search Request</button>
+            </form>
+            <div id="trackResultContainer" style="margin-top: 25px; display: none;">
                 <!-- Dynamically populated tracking timeline -->
             </div>
         </div>
     </div>
 
-    <script type="module" src="portfolio.js"></script>
+    <script type="module" src="policy.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

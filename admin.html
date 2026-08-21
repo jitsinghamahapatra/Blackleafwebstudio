@@ -10,6 +10,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- DB Connection Loading Screen -->
+    <div id="db-loading-screen" class="loading-overlay">
+        <div class="loading-box">
+            <div class="loading-logo">
+                <i class="fa-solid fa-leaf animate-leaf"></i>
+                <span class="logo-text">Blackleaf</span>
+            </div>
+            <div class="loader"></div>
+            <p id="db-loading-status" class="loading-status">Connecting to secure database...</p>
+            <button id="db-retry-btn" class="btn-retry" style="display: none;" onclick="window.location.reload()">Retry Connection</button>
+        </div>
+    </div>
 
     <nav class="admin-nav">
         <div class="nav-logo handwritten">Blackleaf <span style="font-size:1rem; font-family:'Space Mono', monospace;">ADMIN</span></div>
@@ -27,6 +39,7 @@
             <button class="mobile-tab" data-target="tab-packages"><i class="fa-solid fa-tags"></i><span>Packages</span></button>
             <button class="mobile-tab" data-target="tab-projects"><i class="fa-solid fa-image"></i><span>Works</span></button>
             <button class="mobile-tab" data-target="tab-messages"><i class="fa-solid fa-envelope"></i><span>Messages</span></button>
+            <button class="mobile-tab" data-target="tab-pages"><i class="fa-solid fa-file-lines"></i><span>Pages</span></button>
         </div>
 
         <aside class="sidebar">
@@ -36,6 +49,7 @@
                 <li class="nav-item" data-target="tab-packages"><i class="fa-solid fa-tags"></i> Pricing Packages</li>
                 <li class="nav-item" data-target="tab-projects"><i class="fa-solid fa-image"></i> Recent Works</li>
                 <li class="nav-item" data-target="tab-messages"><i class="fa-solid fa-envelope"></i> Contact Messages</li>
+                <li class="nav-item" data-target="tab-pages"><i class="fa-solid fa-file-lines"></i> Edit Pages</li>
             </ul>
         </aside>
 
@@ -147,6 +161,37 @@
                             <!-- Dynamic Messages Loaded Here -->
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- POLICY PAGES EDITING TAB -->
+            <section id="tab-pages" class="tab-pane">
+                <h2>Edit Page Content</h2>
+                <div class="admin-form" style="max-width: 800px; background: transparent; border: none; padding: 0; box-shadow: none;">
+                    <label style="font-weight:bold; margin-bottom:8px; display:block;">Select Page to Edit</label>
+                    <select id="adminPageSelect" class="form-input" style="margin-bottom:20px; border: 2px solid var(--ink-black);">
+                        <optgroup label="Legal Pages">
+                            <option value="page-terms">Terms &amp; Conditions</option>
+                            <option value="page-privacy">Privacy Policy</option>
+                            <option value="page-refund">Refund Policy</option>
+                        </optgroup>
+                        <optgroup label="Main Pages">
+                            <option value="page-home">Home Page</option>
+                            <option value="page-services">Services Page</option>
+                            <option value="page-contact">Contact Page</option>
+                            <option value="page-portfolio">Portfolio Page</option>
+                        </optgroup>
+                    </select>
+                    
+                    <form id="adminPageForm" class="admin-form" style="background: transparent; border: none; padding: 0; box-shadow: none;">
+                        <label style="font-weight:bold; margin-bottom:8px; display:block;">Page Title</label>
+                        <input type="text" id="adminPageTitle" class="form-input" placeholder="Page Title" required style="border: 2px solid var(--ink-black); margin-bottom:20px;">
+                        
+                        <label style="font-weight:bold; margin-bottom:8px; display:block;">Page Content (HTML/Paragraphs allowed)</label>
+                        <textarea id="adminPageContent" class="form-input" rows="12" placeholder="Enter page content here..." required style="border: 2px solid var(--ink-black); margin-bottom:20px; font-family: inherit; resize: vertical;"></textarea>
+                        
+                        <button type="submit" class="btn-request">Save Page Content</button>
+                    </form>
                 </div>
             </section>
         </main>

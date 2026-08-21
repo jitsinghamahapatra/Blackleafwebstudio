@@ -1,3 +1,4 @@
+import { checkDB, hideLoadingScreen } from "./db-check.js";
 import { auth } from "./firebase-config.js";
 import { signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
@@ -634,10 +635,15 @@ function setupDashboardTabs() {
 }
 
 async function init() {
+    const isDbConnected = await checkDB();
+    if (!isDbConnected) return;
+
     if (window.loadThemeSettings) await window.loadThemeSettings();
     await restoreSession();
     setupTrackOrder();
     setupDashboardTabs();
+
+    hideLoadingScreen();
 }
 
 // ==========================================

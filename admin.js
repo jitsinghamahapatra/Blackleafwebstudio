@@ -1,3 +1,5 @@
+import { checkDB, hideLoadingScreen } from './db-check.js';
+
 // Custom Alert
 window.customAlert = function(message, isError = false) {
     let container = document.getElementById('custom-toast-container');
@@ -58,6 +60,9 @@ mobileTabs.forEach(tab => {
 let token = localStorage.getItem("token");
 
 async function checkAdminAccess() {
+    const isDbConnected = await checkDB();
+    if (!isDbConnected) return;
+
     if (!token) {
         redirectToLiveSite();
         return;
@@ -79,6 +84,9 @@ async function checkAdminAccess() {
             loadPackagesAdmin();
             loadProjectsAdmin();
             loadMessagesAdmin();
+            await loadSelectedPageContent();
+            
+            hideLoadingScreen();
         } else {
             redirectToLiveSite();
         }
@@ -815,6 +823,85 @@ async function updateOrderPaymentStatus(id, newPaymentStatus) {
     } catch (err) {
         window.customAlert("Error updating payment status", true);
     }
+}
+
+// ==========================================
+// POLICY PAGES EDITING TAB LOGIC
+// ==========================================
+const adminPageSelect = document.getElementById("adminPageSelect");
+const adminPageForm = document.getElementById("adminPageForm");
+const adminPageTitle = document.getElementById("adminPageTitle");
+const adminPageContent = document.getElementById("adminPageContent");
+
+async function loadSelectedPageContent() {
+    if (!adminPageSelect) return;
+    const key = adminPageSelect.value;
+    try {
+        const res = await fetch(`/api/content/${key}`);
+        if (res.ok) {
+            const data = await res.json();
+            adminPageTitle.value = data.title || "";
+            adminPageContent.value = data.desc || "";
+        } else {
+            // Default Fallbacks
+            if (key === "page-terms") {
+                adminPageTitle.value = "Terms & Conditions";
+                adminPageContent.value = "<h2>1. Agreement to Terms</h2><p>By using our services, you agree to these terms.</p>";
+            } else if (key === "page-privacy") {
+                adminPageTitle.value = "Privacy Policy";
+                adminPageContent.value = "<h2>1. Information We Collect</h2><p>We collect email, name, and project details.</p>";
+            } else if (key === "page-refund") {
+                adminPageTitle.value = "Refund Policy";
+                adminPageContent.value = "<h2>1. Satisfaction Guarantee</h2><p>We strive to deliver exceptional design quality.</p>";
+            } else if (key === "page-home") {
+                adminPageTitle.value = "Home - Hero Section";
+                adminPageContent.value = "Professional, organic, and hand-coded websites for your business. Let's make something cool.";
+            } else if (key === "page-services") {
+                adminPageTitle.value = "Services - Section Intro";
+                adminPageContent.value = "We design and build premium digital experiences, from UI/UX wireframes to fully deployed web systems.";
+            } else if (key === "page-contact") {
+                adminPageTitle.value = "Contact - Intro Text";
+                adminPageContent.value = "Have a project in mind? Reach out and let's build something great together.";
+            } else if (key === "page-portfolio") {
+                adminPageTitle.value = "Portfolio - Section Intro";
+                adminPageContent.value = "A selection of hand-crafted websites and digital projects we've built for clients.";
+            }
+        }
+    } catch (err) {
+        console.error("Failed to load page content", err);
+    }
+}
+
+if (adminPageSelect) {
+    adminPageSelect.addEventListener("change", loadSelectedPageContent);
+}
+
+if (adminPageForm) {
+    adminPageForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const key = adminPageSelect.value;
+        const title = adminPageTitle.value;
+        const desc = adminPageContent.value;
+        
+        try {
+            const res = await fetch(`/api/content/${key}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ title, desc })
+            });
+            if (res.ok) {
+                window.customAlert("Page content updated successfully!");
+            } else {
+                window.customAlert("Failed to update page content", true);
+            }
+        } catch (err) {
+            console.error("Page content update error", err);
+            window.customAlert("Failed to update page content", true);
+        }
+    });
 }
 
 // Check admin session on startup

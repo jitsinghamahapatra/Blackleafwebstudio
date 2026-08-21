@@ -229,7 +229,7 @@ nav {
 }
 
 .hero-image {
-    flex: 1;
+    flex: -1;
     min-width: 300px;
     position: relative;
     display: flex;
@@ -1409,4 +1409,204 @@ label {
     .contact-form-container {
         padding: 25px 15px !important;
     }
+}
+
+/* ========================================== */
+/* DATABASE CONNECTION LOADING SCREEN OVERLAY */
+/* ========================================== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #111111; /* sleek premium dark look */
+    color: #f9f7f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000; /* highest priority */
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.loading-overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loading-box {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 50px 40px;
+    border-radius: 16px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    max-width: 450px;
+    width: 90%;
+    border: 2px solid var(--ink-black);
+    background-color: var(--bg-cream);
+    color: var(--ink-black);
+}
+
+.loading-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    color: var(--ink-black);
+    text-transform: uppercase;
+}
+
+.animate-leaf {
+    animation: leaf-wobble-anim 2s ease-in-out infinite;
+    color: var(--accent-pink);
+}
+
+@keyframes leaf-wobble-anim {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(15deg) scale(1.15); }
+}
+
+.loading-spinner {
+    width: 55px;
+    height: 55px;
+    margin: 0 auto 24px;
+    /* Replaced by .loader below */
+    display: none;
+}
+
+/* Custom branded loader (radial corner dot animation) */
+.loader {
+    width: 50px;
+    aspect-ratio: 1;
+    color: var(--accent-pink, #ff0055);
+    position: relative;
+    animation: l40 .5s infinite alternate;
+    margin: 0 auto 24px;
+}
+.loader:before,
+.loader:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-size: 25px 25px;
+    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+    background-repeat: no-repeat;
+}
+.loader:before {
+    background-image:
+        radial-gradient(farthest-side at top    left, currentColor 96%, #0000),
+        radial-gradient(farthest-side at top    right, currentColor 96%, #0000),
+        radial-gradient(farthest-side at bottom right, currentColor 96%, #0000),
+        radial-gradient(farthest-side at bottom left, currentColor 96%, #0000);
+    animation: l40-1 1s infinite;
+}
+.loader:after {
+    background-image:
+        radial-gradient(farthest-side at top    left, #0000 94%, currentColor 96%),
+        radial-gradient(farthest-side at top    right, #0000 94%, currentColor 96%),
+        radial-gradient(farthest-side at bottom right, #0000 94%, currentColor 96%),
+        radial-gradient(farthest-side at bottom left, #0000 94%, currentColor 96%);
+    animation: l40-2 1s infinite;
+}
+@keyframes l40 {
+    0%   { transform: scale(1); }
+    100% { transform: scale(1.1); }
+}
+@keyframes l40-1 {
+    0%, 10%, 90%, 100% { inset: 0; }
+    40%, 60%            { inset: -10px; }
+}
+@keyframes l40-2 {
+    0%, 40%   { transform: rotate(0deg); }
+    60%, 100% { transform: rotate(90deg); }
+}
+
+.loading-status {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--ink-black);
+    opacity: 0.8;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.btn-retry {
+    display: inline-block;
+    background-color: var(--accent-pink);
+    color: var(--ink-black);
+    padding: 12px 28px;
+    border: 2px solid var(--ink-black);
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0px var(--ink-black);
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+}
+
+.btn-retry:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--ink-black);
+}
+
+.btn-retry:active {
+    transform: translate(0, 0);
+    box-shadow: 4px 4px 0px var(--ink-black);
+}
+
+/* DB Connection Error State styling */
+.loading-overlay.error-state .loading-spinner {
+    display: none;
+}
+
+.loading-overlay.error-state .loading-logo {
+    color: #ff6b6b;
+}
+
+.loading-overlay.error-state .loading-status {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+/* ========================================== */
+/* POLICY PAGES LAYOUT STYLING                */
+/* ========================================== */
+.policy-wrapper {
+    background-color: var(--bg-cream);
+    border: 2px solid var(--ink-black);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 6px 6px 0px var(--ink-black);
+}
+
+.policy-title {
+    font-family: 'Space Mono', monospace;
+    border-bottom: 2px dashed var(--ink-black);
+    padding-bottom: 15px;
+    color: var(--ink-black);
+}
+
+.policy-content h2 {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    margin: 30px 0 12px 0;
+    color: var(--ink-black);
+    text-transform: uppercase;
+}
+
+.policy-content p {
+    margin-bottom: 16px;
+    color: var(--ink-black);
+    opacity: 0.9;
 }

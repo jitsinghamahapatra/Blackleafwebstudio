@@ -1,4 +1,9 @@
-- [x] Implement coordinates safeguard and dynamic composite search in `spider-canvas.js`
-- [x] Set draggedEntity position in loop after frame update in `spider-canvas.js`
-- [x] Set `.hero-image` to `display: none` in mobile query in `style.css`
-- [x] Verify dragging response and mobile image hiding
+- [x] Add `GET /api/db-status` in `server.js`
+- [x] Create `db-check.js` shared module
+- [x] Create `policy.js` dynamic policy loader
+- [x] Create `terms.html`, `privacy.html`, and `refund.html` policy pages
+- [x] Update `admin.html` with the new Pages Editing tab & loading screen markup
+- [x] Update `admin.js` to load, select, and save policy content
+- [x] Inject loading screen markup & update legal footer links in index, services, portfolio, contact, and profile HTML files
+- [x] Update index, services, portfolio, contact, and profile JS files to run the DB check and loading screen fadeout
+- [/] Verify database loading screen, DB failures/retry state, and policy editing in the admin panel

@@ -1,3 +1,4 @@
+import { checkDB, hideLoadingScreen } from "./db-check.js";
 import { auth } from "./firebase-config.js";
 import { signInWithPopup, GoogleAuthProvider, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
@@ -363,10 +364,29 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 // INITIALIZE
 // ==========================================
 async function init() {
+    const isDbConnected = await checkDB();
+    if (!isDbConnected) return;
+
     if (window.loadThemeSettings) await window.loadThemeSettings();
     await restoreSession();
     await loadProjects();
+    await loadPageIntroContent('page-portfolio');
     setupTrackOrder();
+
+    hideLoadingScreen();
+}
+
+async function loadPageIntroContent(key) {
+    try {
+        const res = await fetch(`/api/content/${key}`);
+        if (res.ok) {
+            const data = await res.json();
+            const titleEl = document.getElementById('pageIntroTitle');
+            const descEl = document.getElementById('pageIntroDesc');
+            if (titleEl && data.title) titleEl.innerHTML = data.title;
+            if (descEl && data.desc) descEl.innerHTML = data.desc;
+        }
+    } catch(err) { /* silently fallback */ }
 }
 
 // ==========================================

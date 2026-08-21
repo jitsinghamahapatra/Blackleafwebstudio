@@ -1,30 +1,81 @@
-# Implementation Plan - Cohesive Dragging & Mobile Image Hiding
+# Implementation Plan - Dynamic Pages, Admin Content Editors & DB Status Loading Screen
 
-We will finalize the spider interaction physics and mobile layout:
-1. **Fix Spider Drag Lag (Physics Pullback)**: Keep the dragged spider body exactly at the cursor position by overriding its coordinate after constraints relaxation, preventing constraints from pulling it back and making it feel locked or unmovable.
-2. **Robust Selection & Coordinate Mapping**: Robustly search for the spider composite dynamically (checking for the `.thorax` property) and safeguard the canvas size ratios against division-by-zero to prevent NaN coords.
-3. **Hide Hero Image on Mobile**: Hide the developer image container (`.hero-image`) entirely on mobile screens (viewport width <= 512px) using CSS.
+We will add Terms & Conditions, Privacy Policy, and Refund Policy pages, make them editable in the Admin panel, and integrate a database connection loading screen across all live pages.
+
+## User Review Required
+
+> [!NOTE]
+> - **Fallback Default Texts**: If the DB has no values for Terms, Privacy, or Refund policies, the system will automatically show formatted, legal-ready fallback contents. When the admin edits and saves them, it will populate in the MongoDB collection and update dynamically.
+> - **Database Failure Screen**: If MongoDB is down or disconnected, a full-screen block displays: "Error: Database connection failed. Please reload the page." with a prominent, styled retry button.
 
 ## Proposed Changes
 
-### CSS Layout
+### Database & Server
+
+#### [MODIFY] [server.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server.js)
+- Add the `GET /api/db-status` endpoint that checks `mongoose.connection.readyState === 1` and returns `{ connected: true/false }`.
+- Ensure Content schema routes `POST /api/content/:key` allow saving page contents dynamically.
+
+### CSS Styling
 
 #### [MODIFY] [style.css](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css)
-- Inside the `@media screen and (max-width: 512px)` media query, update `.hero-image` styling to `display: none;`. This hides the developer image and offset border on mobile layouts.
+- Implement rules for the dynamic `.loading-overlay` blocking screen, loading spinners, leaf icons, and custom `.btn-retry` styling.
+- Style `.policy-wrapper` and `.policy-content` blocks for nice readable headings and paragraph heights.
 
-### JavaScript Physics & Grab logic
+### Shared Frontend Utilities
 
-#### [MODIFY] [spider-canvas.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/spider-canvas.js)
-- **Override Position After Physics**:
-  - In the animation `loop` runner, set `sim.draggedEntity.pos.mutableSet(sim.mouse)` *after* calling `sim.frame(16)` and *before* `sim.draw()`. This ensures the dragged spider follows the cursor perfectly.
-- **Robust Spider Detection**:
-  - In `sim.nearestEntity`, search the composites array dynamically for the one containing `.thorax`, avoiding hardcoded array indexes.
-- **Coordinate Safeguards**:
-  - Update pointer and touch event handlers to safeguard against `rect.width === 0` or `rect.height === 0` to prevent coordinates from turning into `NaN`.
+#### [NEW] [db-check.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/db-check.js)
+- Define `checkDB()`: queries `/api/db-status`. If disconnected or fetch fails, displays the error state and reload button.
+- Define `hideLoadingScreen()`: adds the `.fade-out` class to hide the screen once page setup and DB calls are done.
+
+#### [NEW] [policy.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/policy.js)
+- Handles dynamic page text loading for the three policy subpages by parsing the current filename (`terms.html`, `privacy.html`, `refund.html`) and calling the backend `/api/content/:key` endpoint. Falls back to default HTML policies if the DB is unpopulated.
+
+### Dynamic Policy Pages
+
+#### [NEW] [terms.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/terms.html)
+- Standard navbar + footer, database loading screen overlay, content text container, importing `app.js` and `policy.js`.
+
+#### [NEW] [privacy.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/privacy.html)
+- Dynamic Privacy Policy layout.
+
+#### [NEW] [refund.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/refund.html)
+- Dynamic Refund Policy layout.
+
+### Admin Dashboard Content Editors
+
+#### [MODIFY] [admin.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html)
+- Add `<li class="nav-item" data-target="tab-pages">` to Sidebar, and `mobile-tab` to Mobile Tab bar.
+- Add `<section id="tab-pages" class="tab-pane">` containing page selector dropdown, input for title, and textarea for rich policy body text.
+- Insert the standard DB loading screen div inside the body.
+
+#### [MODIFY] [admin.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js)
+- Run `checkDB` and `hideLoadingScreen` on initialization.
+- Implement selection change listeners for `adminPageSelect` to fetch corresponding policy contents.
+- Implement form submission listeners for `adminPageForm` to POST title/description changes to the database.
+
+### Public Subpages
+
+#### [MODIFY] [index.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/index.html)
+#### [MODIFY] [services.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.html)
+#### [MODIFY] [portfolio.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/portfolio.html)
+#### [MODIFY] [contact.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.html)
+#### [MODIFY] [profile.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.html)
+- Add the DB loading screen markup right after the opening `<body>` tag.
+- Update footer `Legal` links to direct to `privacy.html`, `terms.html`, and `refund.html`.
+
+#### [MODIFY] [app.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/app.js)
+#### [MODIFY] [services.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.js)
+#### [MODIFY] [portfolio.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/portfolio.js)
+#### [MODIFY] [contact.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.js)
+#### [MODIFY] [profile.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js)
+- Import `checkDB` and `hideLoadingScreen` from `./db-check.js`.
+- Prevent execution at the top of `init()` if `checkDB()` returns false.
+- Trigger `hideLoadingScreen()` at the end of the `init()` sequence.
 
 ## Verification Plan
 
-### Manual Verification
-1. Load the page on desktop and drag the spider from any leg/body part. Verify it follows the cursor cleanly without lag or lockup.
-2. Resize the browser to a mobile layout (width <= 512px) and verify the developer image container disappears.
-3. Verify that scrolling the page on mobile works by dragging on empty space, and the spider remains draggable.
+### Automated/Staging Tests
+- Run database connection check: stop local MongoDB server and load the site. Verify the error loading screen is displayed with the retry button.
+- Start MongoDB server. Verify that the loading screen fades out immediately.
+- Test editing in Admin: change Terms & Conditions, click Save, and verify the live `terms.html` page updates in real-time.
