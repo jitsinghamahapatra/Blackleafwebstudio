@@ -1420,8 +1420,8 @@ label {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: #111111; /* sleek premium dark look */
-    color: #f9f7f2;
+    background-color: var(--bg-cream, #f9f7f2); /* creamy page background */
+    color: var(--ink-black);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1439,30 +1439,18 @@ label {
 
 .loading-box {
     text-align: center;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 50px 40px;
-    border-radius: 16px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
     max-width: 450px;
     width: 90%;
-    border: 2px solid var(--ink-black);
-    background-color: var(--bg-cream);
-    color: var(--ink-black);
 }
 
 .loading-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 24px;
-    color: var(--ink-black);
-    text-transform: uppercase;
+    display: none; /* Hide when loading */
 }
 
 .animate-leaf {
@@ -1478,8 +1466,7 @@ label {
 .loading-spinner {
     width: 55px;
     height: 55px;
-    margin: 0 auto 24px;
-    /* Replaced by .loader below */
+    margin: 0 auto;
     display: none;
 }
 
@@ -1490,7 +1477,7 @@ label {
     color: var(--accent-pink, #ff0055);
     position: relative;
     animation: l40 .5s infinite alternate;
-    margin: 0 auto 24px;
+    margin: 0 auto; /* Centered, no bottom margin needed when text is hidden */
 }
 .loader:before,
 .loader:after {
@@ -1531,12 +1518,7 @@ label {
 }
 
 .loading-status {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.95rem;
-    color: var(--ink-black);
-    opacity: 0.8;
-    margin-bottom: 24px;
-    line-height: 1.5;
+    display: none; /* Hide when loading */
 }
 
 .btn-retry {
@@ -1566,17 +1548,38 @@ label {
 }
 
 /* DB Connection Error State styling */
-.loading-overlay.error-state .loading-spinner {
+.loading-overlay.error-state .loading-box {
+    background-color: var(--bg-cream);
+    border: 2px solid var(--ink-black);
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.loading-overlay.error-state .loader {
     display: none;
 }
 
 .loading-overlay.error-state .loading-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 20px;
     color: #ff6b6b;
+    text-transform: uppercase;
 }
 
 .loading-overlay.error-state .loading-status {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem;
     color: #ff6b6b;
     font-weight: bold;
+    margin-bottom: 24px;
+    line-height: 1.5;
 }
 
 /* ========================================== */
