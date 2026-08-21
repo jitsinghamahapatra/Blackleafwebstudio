@@ -1,103 +1,30 @@
-# Implementation Plan - Redesign & System Updates
+# Implementation Plan - Cohesive Dragging & Mobile Image Hiding
 
-This plan outlines the changes required to satisfy the design and system updates requested for Blackleaf Studio.
+We will finalize the spider interaction physics and mobile layout:
+1. **Fix Spider Drag Lag (Physics Pullback)**: Keep the dragged spider body exactly at the cursor position by overriding its coordinate after constraints relaxation, preventing constraints from pulling it back and making it feel locked or unmovable.
+2. **Robust Selection & Coordinate Mapping**: Robustly search for the spider composite dynamically (checking for the `.thorax` property) and safeguard the canvas size ratios against division-by-zero to prevent NaN coords.
+3. **Hide Hero Image on Mobile**: Hide the developer image container (`.hero-image`) entirely on mobile screens (viewport width <= 512px) using CSS.
 
 ## Proposed Changes
 
----
+### CSS Layout
 
-### 1. Database & Server Core
+#### [MODIFY] [style.css](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css)
+- Inside the `@media screen and (max-width: 512px)` media query, update `.hero-image` styling to `display: none;`. This hides the developer image and offset border on mobile layouts.
 
-#### [MODIFY] [`Request.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server/models/Request.js)
-- Update the `Request` schema:
-  - Add `paymentStatus` field with enum `['Not Paid', 'Paid']`, defaulting to `'Not Paid'`.
-  - Add `'Delivered'` to the `status` enum list.
+### JavaScript Physics & Grab logic
 
-#### [MODIFY] [`server.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server.js)
-- Update the PUT `/api/orders/:id` route to support updating the `paymentStatus` field.
-- Redesign the GET `/api/orders/track/:id` tracking query to be string-safe and support both 24-character full `_id` inputs and 8-character partial ID inputs using MongoDB `$expr` string matching.
-
----
-
-### 2. Styling Accent Update
-
-#### [MODIFY] [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css)
-- Change `--accent-pink` globally to `#ff758f` (a more vibrant and premium pink color).
-
----
-
-### 3. Theme Settings Removal
-
-#### [MODIFY] [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html)
-- Remove the "Theme Settings" tab selector from the sidebar (`.sidebar .nav-list`).
-- Remove the "Theme Settings" tab selector from the mobile navigation (`.mobile-tabs`).
-- Delete the `<section id="tab-settings" class="tab-pane">` containing the color picker form.
-
-#### [MODIFY] [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js)
-- Remove `loadThemeSettingsAdmin()` call on page load.
-- Delete the `loadThemeSettingsAdmin` function and color picker event handlers.
-
-#### [MODIFY] [HTML Pages] (index, services, contact, portfolio, profile, admin)
-- Remove the dynamic `loadThemeSettings` block in the `<head>` of all pages so they rely strictly on static CSS colors.
-
----
-
-### 4. Admin Requests Panel Updates
-
-#### [MODIFY] [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html)
-- Add a new "Payment" header column to the Web Requests table (`<thead>`).
-
-#### [MODIFY] [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js)
-- Update `loadOrders()` to render a `select` dropdown for Payment Status ("Paid" / "Not Paid") for both desktop rows and mobile cards.
-- Add `'Delivered'` as an option in the Status dropdown.
-- Implement the `updateOrderPaymentStatus()` handler.
-
----
-
-### 5. Client Dashboard & Stepper Updates
-
-#### [MODIFY] [`profile.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js)
-- Remove the "Download Invoice" button from the requests list item template.
-- Remove the click event listener wiring for `.btn-download-invoice`.
-- Update the progress stepper step mapping to support 6 steps (including "Delivered").
-
-#### [MODIFY] [`services.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.js)
-#### [MODIFY] [`portfolio.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/portfolio.js)
-#### [MODIFY] [`contact.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.js)
-#### [MODIFY] [`app.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/app.js)
-- Update the Track Order progress stepper mappings to support 6 steps (including "Delivered").
-
----
-
-### 6. Invoice PDF Redesign
-
-#### [MODIFY] [`index.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/index.html)
-#### [MODIFY] [`services.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.html)
-#### [MODIFY] [`profile.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.html)
-- Redesign the `window.downloadInvoicePDF` function:
-  - Remove the website link `"https://blackleaf.web.app"`.
-  - Fix the solid black block by explicitly setting fill color to white (`255, 255, 255`) before rendering the metadata box.
-  - Set the header fill color to the new static pink (`255, 117, 143` corresponding to `#ff758f`).
-  - Update the "TOTAL DUE AMOUNT:" text to "TOTAL AMOUNT:".
-  - Change the total box fill color to a light pink shade `#fff0f3` (`255, 240, 243`).
-  - Standardize fonts to Courier.
-
----
+#### [MODIFY] [spider-canvas.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/spider-canvas.js)
+- **Override Position After Physics**:
+  - In the animation `loop` runner, set `sim.draggedEntity.pos.mutableSet(sim.mouse)` *after* calling `sim.frame(16)` and *before* `sim.draw()`. This ensures the dragged spider follows the cursor perfectly.
+- **Robust Spider Detection**:
+  - In `sim.nearestEntity`, search the composites array dynamically for the one containing `.thorax`, avoiding hardcoded array indexes.
+- **Coordinate Safeguards**:
+  - Update pointer and touch event handlers to safeguard against `rect.width === 0` or `rect.height === 0` to prevent coordinates from turning into `NaN`.
 
 ## Verification Plan
 
-### Automated Verification
-- Verify database connection and check if server boots up correctly using `npm run dev`.
-- Ensure there are no runtime compilation/linting errors.
-
 ### Manual Verification
-1. **Invoice Download**: Submit a new request on the Services page. Verify that it auto-downloads a redesigned PDF with a pink header, white metadata box (no black block), no website link, and "TOTAL AMOUNT:".
-2. **Dashboard Requests**: Log into the Client Dashboard. Verify that:
-   - There is NO "Download Invoice" button under the requests.
-   - The status stepper shows up to 6 steps if status is "Delivered".
-3. **Admin Panel**:
-   - Verify the "Theme Settings" section is completely gone.
-   - Verify the Requests list has a new "Payment" status column with "Paid" / "Not Paid" dropdown options.
-   - Verify the Status dropdown has the "Delivered" option.
-   - Change a request's status to "Delivered" and payment status to "Paid", verify it updates.
-4. **Order Tracking**: Search using the Track Order search modal with the first 8 characters of an Invoice ID. Verify that the stepper is updated to 6 steps and loads the status correctly.
+1. Load the page on desktop and drag the spider from any leg/body part. Verify it follows the cursor cleanly without lag or lockup.
+2. Resize the browser to a mobile layout (width <= 512px) and verify the developer image container disappears.
+3. Verify that scrolling the page on mobile works by dragging on empty space, and the spider remains draggable.

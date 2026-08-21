@@ -203,6 +203,7 @@ nav {
     min-width: 300px;
     z-index: 2;
     position: relative;
+    pointer-events: none;
 }
 
 .hero-title {
@@ -235,6 +236,7 @@ nav {
     justify-content: center;
     align-items: center;
     z-index: 2;
+    pointer-events: none;
 }
 
 /* Random Image Container */
@@ -247,6 +249,17 @@ nav {
     background-color: #ddd;
 }
 
+.web-hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: auto;
+    display: block;
+}
+
 .offset-border {
     position: absolute;
     top: 20px;
@@ -255,6 +268,15 @@ nav {
     height: 450px;
     border: 2px solid var(--ink-blue);
     z-index: 1;
+    pointer-events: none;
+}
+
+.hero-content a,
+.hero-content button,
+.hero-image a,
+.hero-image button,
+.hero-image img {
+    pointer-events: auto;
 }
 
 /* ============================= */
@@ -941,9 +963,7 @@ label {
     }
 
     .hero-image {
-        width: 100%;
-        margin-top: 0px;
-        min-width: auto;
+        display: none;
     }
 
     .random-img-box {

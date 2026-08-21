@@ -158,3 +158,41 @@ We transitioned the Blackleaf Studio web application from Firebase Firestore to 
      ```
 4. Access `http://localhost:5173` to test Google registration, Profile dashboard, tracking requests, and redesigned invoice downloads.
 
+---
+
+## 🕷️ Interactive Spider Web Hero Canvas (Aug 2026)
+
+### Changes Implemented
+- **HTML Layout**: Placed the canvas element `<canvas id="web" class="web-hero-background"></canvas>` at the top of the `<section class="hero">` container so that it covers the background of the entire hero section.
+- **Developer Image Styling (Responsive Desktop-Only)**:
+  - The developer image inside `.hero-image` is shown on desktop screens.
+  - Hides the image container (`.hero-image { display: none; }`) completely inside the `@media screen and (max-width: 512px)` mobile query. This ensures clean readability on mobile screens where only copy, CTA, and the background canvas are needed.
+- **Absolute Background Styling & Pointer Events Pass-through**:
+  - Styled `.web-hero-background` in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css) with absolute positioning and `z-index: 1`.
+  - Added `pointer-events: none` to layout columns `.hero-content` and `.hero-image`. Added `pointer-events: auto` to clickable foreground child elements (e.g. CTA buttons, links, static image). This allows mouse clicks and touch events on empty space to pass through seamlessly to the background canvas while keeping foreground buttons active.
+- **Dynamic Physics & Resize Re-centering**:
+  - Re-coded [`spider-canvas.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/spider-canvas.js) to dynamically fetch the bounding dimensions of `.hero` on load, and listen to window resize events.
+  - Implemented an offset-shifting algorithm inside the `resize` listener: shifts all active particles (both spider and web) and updating coordinates of all `PinConstraint` instances by the center coordinate delta `(dx, dy)`. This keeps the assembly perfectly centered during screen rotations and viewport changes without resetting physics.
+- **Physics Leg Attachment & Lag-Free Dragging**:
+  - Initialized the spider at the center of the web `new Vec2(width / 2, height / 2)` and triggered initial crawl constraints for all 8 legs on startup to prevent dropping or disconnecting.
+  - Corrected left/right foot crawl symmetry indexes by mapping right-side legs to `flag2 = 1` and left-side legs to `flag2 = -1`.
+  - Overrode `sim.nearestEntity` to check all spider composite particles dynamically using a search radius of `45px` (for easy grabbing on both desktop and mobile), but always returning the center `thorax` particle so that the spider is dragged cohesively without disjointing.
+  - Overrode the render `loop` runner to force `sim.draggedEntity.pos.mutableSet(sim.mouse)` right after `sim.frame(16)` and before `sim.draw()`. This eliminates the constraint pullback lag, allowing the spider to track the cursor perfectly during drag operations.
+  - Added width/height safety guards in event coordinate calculation to prevent division-by-zero that causes coordinates to resolve to `NaN`.
+
+### Verification & Visuals
+The simulation was verified using a browser automation agent at `http://localhost:5173`.
+- Clicking empty spaces in the hero section passes events to the background.
+- Grabbing any part of the spider drags the body smoothly and deforms the web without lag.
+- Resizing the browser to mobile width hides the developer image.
+
+Here are the screenshots captured during verification:
+
+#### Lag-Free Spider Drag:
+![Spider Drag Test](file:///C:/Users/jitsi/.gemini/antigravity-ide/brain/0c129bad-60b1-4fab-b329-0c5bda776832/spider_dragging_correct_1787280810251.png)
+
+#### Mobile View (Hiding Developer Image):
+![Mobile View Hiding Image](file:///C:/Users/jitsi/.gemini/antigravity-ide/brain/0c129bad-60b1-4fab-b329-0c5bda776832/mobile_layout_view_1787280865001.png)
+
+#### Video Recording:
+You can watch the full recorded session of the verification [here](file:///C:/Users/jitsi/.gemini/antigravity-ide/brain/0c129bad-60b1-4fab-b329-0c5bda776832/spider_dragging_fix_1787280650553.webp).
