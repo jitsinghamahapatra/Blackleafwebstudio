@@ -402,7 +402,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // Adjust origin, segments, and depth dynamically for performance on mobile
   var centerY = height / 2;
   if (isMobile) {
-    centerY += 50; // Shift spiderweb down on mobile
+    centerY += 120; // Shift spiderweb down on mobile
   }
 
   var webSegments = 20; // Ensure 5 endpoints on both mobile and PC
@@ -468,8 +468,8 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.lineTo(constraint.b.pos.x, constraint.b.pos.y);
       }
     }
-    ctx.strokeStyle = "rgba(67, 67, 67, 0.12)"; // Thin, natural dark charcoal thread with soft transparency
-    ctx.lineWidth = 0.7; // Delicate, hair-like thickness
+    ctx.strokeStyle = "rgba(0, 119, 125, 0.17)"; // Thin, natural dark charcoal thread with soft transparency
+    ctx.lineWidth = 0.8; // Delicate, hair-like thickness
     ctx.stroke();
   };
 
@@ -579,7 +579,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Track old center coordinates for shifting assemblies on resize
   var oldCenterX = width / 2;
-  var oldCenterY = isMobile ? (height / 2 + 50) : (height / 2);
+  var oldCenterY = isMobile ? (height / 2 + 120) : (height / 2);
 
   // Handle window resizing dynamically to adjust canvas resolution and physics boundaries
   window.addEventListener("resize", function() {
@@ -599,7 +599,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Shift web and spider to the new center dynamically on viewport changes
     var newCenterX = width / 2;
-    var newCenterY = isMobile ? (height / 2 + 50) : (height / 2);
+    var newCenterY = isMobile ? (height / 2 + 120) : (height / 2);
     var dx = newCenterX - oldCenterX;
     var dy = newCenterY - oldCenterY;
     
