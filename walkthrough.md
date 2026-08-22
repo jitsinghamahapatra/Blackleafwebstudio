@@ -20,10 +20,13 @@ We have successfully implemented editable contact details, a styled map containe
 - Programmed form visibility toggling, input loading, and POST body compiling for the `contact-info` key in [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js).
 
 ### 4. Homepage Message Notifications
-- Implemented styled glassmorphic popup rules (`background: rgba(25, 25, 25, 0.9); backdrop-filter: blur(12px)`) for `.toast-notification` with entrada slide-up and dismissal exit transitions in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css).
+- Implemented styled glassmorphic popup rules (`background: rgba(25, 25, 25, 0.9); backdrop-filter: blur(12px)`) for `.toast-notification` with entrance slide-up and dismissal exit transitions in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css).
 - Redesigned `#unreadNotificationBanner` inside [`index.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/index.html) to map to the new toast notification system, complete with a bouncing bell icon (`fa-bell fa-bounce`).
-- Programmed `checkUnreadMessages()` in [`app.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/app.js) to fetch unread message counts on homepage load, display the toast notification with a 1.5s delay, and mark all unread messages as read once clicked or dismissed.
-- Resolved a race condition where navigating via the toast action link would abort the `read-all` API fetch.
+- Programmed `checkUnreadMessages()` in [`app.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/app.js) to fetch unread message counts. 
+- **Session Dismissal**: Clicking "Dismiss" on the homepage toast hides the banner for the current session (via `sessionStorage`) but leaves the red unread dot on the Profile link active as requested.
+- **Inbox-Click Read Mapping**: 
+  - For regular users: clicking the notification redirects them to the support inbox (`profile.html#support`). Opening the support tab instantly triggers `PUT /api/messages/read-all` to clear all unread marks.
+  - For administrators: unread indicators are preserved when entering `admin.html`. A message is only marked as read when the admin clicks "View / Reply" to open that conversation thread.
 
 ### 5. Mobile Spiderweb & Performance Optimizations
 - **5 Endpoints on Mobile**: Configured `webSegments` to be `20` on both mobile and PC. Because the simulation pins/anchors every 4th segment, this guarantees exactly 5 pinned endpoints on all screen types while retaining a lightweight `depth = 5` particle layout on mobile.

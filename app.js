@@ -233,67 +233,75 @@ async function checkUnreadMessages() {
             const count = data.unreadCount || 0;
             
             if (count > 0) {
-                // Show badge on profile button for regular users
+                // Show badge on profile button for regular users (always active until read)
                 if (badge && currentUser.role !== 'admin') {
                     badge.style.display = "block";
                 } else if (badge) {
                     badge.style.display = "none";
                 }
 
-                if (banner && textEl && linkEl) {
-                    const isAdmin = currentUser.role === 'admin';
-                    if (isAdmin) {
-                        textEl.textContent = `You have ${count} new unread message${count > 1 ? 's' : ''} from clients.`;
-                        linkEl.href = "admin.html";
-                        linkEl.textContent = "Open Admin Panel";
-                    } else {
-                        textEl.textContent = `You have ${count} new repl${count > 1 ? 'ies' : 'y'} from the administrator.`;
-                        linkEl.href = "profile.html";
-                        linkEl.textContent = "View Dashboard";
+                // Only show toast banner if unread count is higher than the last dismissed count
+                const dismissedCount = parseInt(sessionStorage.getItem("dismissedUnreadCount") || "-1", 10);
+                if (count > dismissedCount) {
+                    if (banner && textEl && linkEl) {
+                        const isAdmin = currentUser.role === 'admin';
+                        if (isAdmin) {
+                            textEl.textContent = `You have ${count} new unread message${count > 1 ? 's' : ''} from clients.`;
+                            linkEl.href = "admin.html";
+                            linkEl.textContent = "Open Admin Panel";
+                        } else {
+                            textEl.textContent = `You have ${count} new repl${count > 1 ? 'ies' : 'y'} from the administrator.`;
+                            linkEl.href = "profile.html#support"; // Direct hash to support tab
+                            linkEl.textContent = "View Dashboard";
+                        }
+                        
+                        // Show toast after 1.5 seconds delay
+                        setTimeout(() => {
+                            banner.classList.remove("hide");
+                            banner.classList.add("show");
+                        }, 1500);
+
+                        // Add dismissal logic
+                        const markAllRead = async () => {
+                            try {
+                                await fetch("/api/messages/read-all", {
+                                    method: "PUT",
+                                    headers: { 
+                                        "Authorization": `Bearer ${token}`,
+                                        "Content-Type": "application/json"
+                                    }
+                                });
+                            } catch(e) { console.error("Error marking all read", e); }
+                        };
+
+                        closeBtn.onclick = (e) => {
+                            e.preventDefault();
+                            banner.classList.remove("show");
+                            banner.classList.add("hide");
+                            // Set dismissed count so it doesn't pop up again unless a NEW message is received
+                            sessionStorage.setItem("dismissedUnreadCount", count);
+                        };
+
+                        linkEl.onclick = async (e) => {
+                            e.preventDefault();
+                            const targetHref = linkEl.href;
+                            
+                            if (currentUser.role === 'admin') {
+                                // Admins view messages individually
+                                window.location.href = targetHref;
+                            } else {
+                                // Users mark all as read when clicking the notification to view the support inbox
+                                await markAllRead();
+                                window.location.href = targetHref;
+                            }
+                        };
                     }
-                    
-                    // Show toast after 1.5 seconds delay
-                    setTimeout(() => {
-                        banner.classList.remove("hide");
-                        banner.classList.add("show");
-                    }, 1500);
-
-                    // Add dismissal logic
-                    const markAllRead = async () => {
-                        try {
-                            await fetch("/api/messages/read-all", {
-                                method: "PUT",
-                                headers: { 
-                                    "Authorization": `Bearer ${token}`,
-                                    "Content-Type": "application/json"
-                                }
-                            });
-                        } catch(e) { console.error("Error marking all read", e); }
-                    };
-
-                    const dismissToast = async () => {
-                        banner.classList.remove("show");
-                        banner.classList.add("hide");
-                        if (badge) badge.style.display = "none";
-                        await markAllRead();
-                    };
-
-                    closeBtn.onclick = (e) => {
-                        e.preventDefault();
-                        dismissToast();
-                    };
-
-                    linkEl.onclick = async (e) => {
-                        e.preventDefault();
-                        const targetHref = linkEl.href;
-                        // Mark as read, then navigate
-                        await markAllRead();
-                        window.location.href = targetHref;
-                    };
                 }
             } else {
                 if (badge) badge.style.display = "none";
                 if (banner) banner.classList.remove("show");
+                // Clear dismissed count since there are no unread messages
+                sessionStorage.removeItem("dismissedUnreadCount");
             }
         }
     } catch (err) {

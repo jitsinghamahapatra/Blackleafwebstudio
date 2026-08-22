@@ -155,6 +155,14 @@ async function restoreSession() {
             
             // Load dashboard data
             loadDashboardData();
+
+            // Check url hash to pre-select support tab
+            if (window.location.hash === "#support") {
+                const supportBtn = document.querySelector('.tab-btn[data-tab="support"]');
+                if (supportBtn) {
+                    supportBtn.click();
+                }
+            }
         } else {
             localStorage.removeItem("token");
             window.location.href = "index.html";
@@ -431,24 +439,25 @@ function renderMessagesList(messages) {
     list.querySelectorAll(".message-card").forEach(card => {
         const id = card.dataset.id;
         
-        // Mark as read when clicked/interacted
+        // Mark as read immediately when card is clicked (viewing the message)
         card.addEventListener("click", async (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('form')) {
                 return;
             }
             const dot = card.querySelector("span[title='Unread Reply']");
             if (dot) {
+                // Remove dot immediately from UI
+                dot.remove();
                 try {
                     const token = localStorage.getItem("token");
-                    const res = await fetch(`/api/messages/${id}/read`, {
+                    await fetch(`/api/messages/${id}/read`, {
                         method: "PUT",
                         headers: { "Authorization": `Bearer ${token}` }
                     });
-                    if (res.ok) {
-                        dot.remove();
-                        // Trigger count badge updates in header
-                        restoreSession();
-                    }
+                    // Hide profile badge if no more unread messages
+                    const badge = document.getElementById("profileBadge");
+                    const remaining = document.querySelectorAll(".message-card span[title='Unread Reply']").length;
+                    if (badge && remaining === 0) badge.style.display = "none";
                 } catch (e) {}
             }
         });
@@ -615,6 +624,32 @@ if (emailAuthBtn) {
     });
 }
 
+async function markAllMessagesAsRead() {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+        // Instantly clear all unread dots from the visible cards
+        document.querySelectorAll(".message-card span[title='Unread Reply']").forEach(dot => dot.remove());
+        // Instantly hide the profile badge
+        const badge = document.getElementById("profileBadge");
+        if (badge) badge.style.display = "none";
+        // Also clear toast session so it doesn't show again for the same count
+        sessionStorage.removeItem("dismissedUnreadCount");
+
+        // Call API in background
+        await fetch("/api/messages/read-all", {
+            method: "PUT",
+            headers: { 
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+    } catch (e) {
+        console.error("Error marking all read:", e);
+    }
+}
+
+
 function setupDashboardTabs() {
     const tabButtons = document.querySelectorAll(".tab-btn");
     const tabPanels = document.querySelectorAll(".tab-panel");
@@ -630,6 +665,9 @@ function setupDashboardTabs() {
             if (targetPanel) {
                 targetPanel.style.display = "block";
             }
+            if (target === "support") {
+                markAllMessagesAsRead();
+            }
         });
     });
 }
@@ -641,9 +679,9 @@ async function init() {
     hideLoadingScreen();
 
     if (window.loadThemeSettings) window.loadThemeSettings();
+    setupDashboardTabs(); // Init tabs first so hash selects work immediately
     restoreSession();
     setupTrackOrder();
-    setupDashboardTabs();
 }
 
 // ==========================================

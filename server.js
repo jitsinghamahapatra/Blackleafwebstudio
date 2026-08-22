@@ -706,7 +706,7 @@ app.put('/api/messages/:id/read', auth, async (req, res) => {
     
     if (req.user.role === 'admin') {
       msg.readByAdmin = true;
-    } else if (msg.uid === req.user.id) {
+    } else if (msg.uid === req.user.id || (msg.email && msg.email.toLowerCase() === req.user.email.toLowerCase())) {
       msg.readByUser = true;
     }
     
