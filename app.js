@@ -212,17 +212,90 @@ function updateUIState() {
 
 async function checkUnreadMessages() {
     const badge = document.getElementById("profileBadge");
-    if (badge) badge.style.display = "none";
     const banner = document.getElementById("unreadNotificationBanner");
-    if (banner) banner.style.display = "none";
-}
+    const textEl = document.getElementById("unreadNotificationText");
+    const linkEl = document.getElementById("unreadNotificationLink");
+    const closeBtn = document.getElementById("closeUnreadBanner");
 
-const closeUnreadBanner = document.getElementById("closeUnreadBanner");
-if (closeUnreadBanner) {
-    closeUnreadBanner.addEventListener("click", () => {
-        const banner = document.getElementById("unreadNotificationBanner");
-        if (banner) banner.style.display = "none";
-    });
+    const token = localStorage.getItem("token");
+    if (!token || !currentUser) {
+        if (badge) badge.style.display = "none";
+        if (banner) banner.classList.remove("show");
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/messages/unread-count", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const count = data.unreadCount || 0;
+            
+            if (count > 0) {
+                // Show badge on profile button for regular users
+                if (badge && currentUser.role !== 'admin') {
+                    badge.style.display = "block";
+                } else if (badge) {
+                    badge.style.display = "none";
+                }
+
+                if (banner && textEl && linkEl) {
+                    const isAdmin = currentUser.role === 'admin';
+                    if (isAdmin) {
+                        textEl.textContent = `You have ${count} new unread message${count > 1 ? 's' : ''} from clients.`;
+                        linkEl.href = "admin.html";
+                        linkEl.textContent = "Open Admin Panel";
+                    } else {
+                        textEl.textContent = `You have ${count} new repl${count > 1 ? 'ies' : 'y'} from the administrator.`;
+                        linkEl.href = "profile.html";
+                        linkEl.textContent = "View Dashboard";
+                    }
+                    
+                    // Show toast after 1.5 seconds delay
+                    setTimeout(() => {
+                        banner.classList.remove("hide");
+                        banner.classList.add("show");
+                    }, 1500);
+
+                    // Add dismissal logic
+                    const markAllRead = async () => {
+                        try {
+                            await fetch("/api/messages/read-all", {
+                                method: "PUT",
+                                headers: { 
+                                    "Authorization": `Bearer ${token}`,
+                                    "Content-Type": "application/json"
+                                }
+                            });
+                        } catch(e) { console.error("Error marking all read", e); }
+                    };
+
+                    const dismissToast = async () => {
+                        banner.classList.remove("show");
+                        banner.classList.add("hide");
+                        if (badge) badge.style.display = "none";
+                        await markAllRead();
+                    };
+
+                    closeBtn.onclick = (e) => {
+                        e.preventDefault();
+                        dismissToast();
+                    };
+
+                    linkEl.onclick = async () => {
+                        // Mark as read, then navigate
+                        await markAllRead();
+                    };
+                }
+            } else {
+                if (badge) badge.style.display = "none";
+                if (banner) banner.classList.remove("show");
+            }
+        }
+    } catch (err) {
+        console.error("Error checking unread messages", err);
+    }
 }
 
 // RESTORE USER SESSION

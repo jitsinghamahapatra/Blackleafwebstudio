@@ -837,6 +837,22 @@ async function loadSelectedPageContent() {
     if (!adminPageSelect) return;
     const key = adminPageSelect.value;
     
+    // Toggle standard vs contact fields visibility
+    const standardPageFields = document.getElementById("standardPageFields");
+    const contactInfoFields = document.getElementById("contactInfoFields");
+    
+    if (key === "contact-info") {
+        if (standardPageFields) standardPageFields.style.display = "none";
+        if (contactInfoFields) contactInfoFields.style.display = "block";
+        if (adminPageTitle) adminPageTitle.removeAttribute("required");
+        if (adminPageContent) adminPageContent.removeAttribute("required");
+    } else {
+        if (standardPageFields) standardPageFields.style.display = "block";
+        if (contactInfoFields) contactInfoFields.style.display = "none";
+        if (adminPageTitle) adminPageTitle.setAttribute("required", "");
+        if (adminPageContent) adminPageContent.setAttribute("required", "");
+    }
+    
     // Update labels dynamically based on selection
     const titleLabel = document.querySelector('label[for="adminPageTitle"]') || document.querySelector('#adminPageForm label:nth-of-type(1)');
     const contentLabel = document.querySelector('label[for="adminPageContent"]') || document.querySelector('#adminPageForm label:nth-of-type(2)');
@@ -853,8 +869,15 @@ async function loadSelectedPageContent() {
         const res = await fetch(`/api/content/${key}`);
         if (res.ok) {
             const data = await res.json();
-            adminPageTitle.value = data.title || "";
-            adminPageContent.value = data.desc || "";
+            if (key === "contact-info") {
+                document.getElementById("contactEmailInput").value = data.title || "";
+                document.getElementById("contactPhoneInput").value = data.desc || "";
+                document.getElementById("contactAddressInput").value = data.priceTag || "";
+                document.getElementById("contactMapInput").value = data.img || "";
+            } else {
+                adminPageTitle.value = data.title || "";
+                adminPageContent.value = data.desc || "";
+            }
         } else {
             // Default Fallbacks
             if (key === "page-terms") {
@@ -881,6 +904,11 @@ async function loadSelectedPageContent() {
             } else if (key === "socials") {
                 adminPageTitle.value = "https://www.linkedin.com/in/jitsinghamahapatra/";
                 adminPageContent.value = "https://github.com/jitsinghamahapatra";
+            } else if (key === "contact-info") {
+                document.getElementById("contactEmailInput").value = "info@blackleafstudio.com";
+                document.getElementById("contactPhoneInput").value = "";
+                document.getElementById("contactAddressInput").value = "Orissa, India";
+                document.getElementById("contactMapInput").value = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3742.0620600125867!2d85.81893277508492!3d20.297746181177603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a1909d3df997e5b%3A0x6b7b41e8c954e7d4!2sBhubaneswar%2C%20Odisha!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin";
             }
         }
     } catch (err) {
@@ -896,8 +924,21 @@ if (adminPageForm) {
     adminPageForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const key = adminPageSelect.value;
-        const title = adminPageTitle.value;
-        const desc = adminPageContent.value;
+        
+        let body = {};
+        if (key === "contact-info") {
+            body = {
+                title: document.getElementById("contactEmailInput").value,
+                desc: document.getElementById("contactPhoneInput").value,
+                priceTag: document.getElementById("contactAddressInput").value,
+                img: document.getElementById("contactMapInput").value
+            };
+        } else {
+            body = {
+                title: adminPageTitle.value,
+                desc: adminPageContent.value
+            };
+        }
         
         try {
             const res = await fetch(`/api/content/${key}`, {
@@ -906,12 +947,14 @@ if (adminPageForm) {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ title, desc })
+                body: JSON.stringify(body)
             });
+            
             if (res.ok) {
                 window.customAlert("Page content updated successfully!");
             } else {
-                window.customAlert("Failed to update page content", true);
+                const errData = await res.json();
+                window.customAlert(errData.message || "Failed to update page content", true);
             }
         } catch (err) {
             console.error("Page content update error", err);

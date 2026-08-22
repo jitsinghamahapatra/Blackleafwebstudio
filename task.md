@@ -1,11 +1,8 @@
-- [x] Implement static `/uploads` serving & `POST /api/upload` base64 image uploader in `server.js`
-- [x] Rename `portfolio.html` to `work.html` and `portfolio.js` to `work.js`
-- [x] Update `vite.config.js` to rename portfolio input and include terms, privacy, and refund pages
-- [x] Update navigation links and text labels (Portfolio -> Work) in all HTML pages
-- [x] Add the Socials column to all page footers
-- [x] Update `admin.html` with file uploads and the socials option in page selector
-- [x] Update `admin.js` with base64 image uploader, socials selector, and portfolio-to-work renames
-- [x] Update `db-check.js` to load social links dynamically on loader hide
-- [x] Optimize loader speed (hide immediately on DB success) in all page scripts
-- [x] Add smooth scale zoom-out & fade-out transitions to `.loading-overlay` in `style.css`
-- [x] Verify the build and check functionalities in local dev server
+- [x] Update `server.js` with unread messages count roles check & `PUT /api/messages/read-all` endpoint
+- [x] Update `contact.html` with dynamic detail element IDs, phone number slot, and map container
+- [x] Update `contact.js` to fetch and load contact-info details dynamically (toggling map/phone display)
+- [x] Update `admin.html` with contact fields form sections and dropdown select option
+- [x] Update `admin.js` to toggle and save contact-info fields dynamically
+- [x] Implement `.toast-notification` glassmorphic CSS styling in `style.css`
+- [x] Implement `checkMessageNotifications()` and Toast UI builder in `app.js` on homepage load
+- [x] Run `npm run build` to verify the code compilation

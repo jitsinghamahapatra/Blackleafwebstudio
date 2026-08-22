@@ -1,72 +1,62 @@
-# Implementation Plan - Admin Panel Expansion, Portfolio Rename, Loader Optimization & Build Configuration
+# Implementation Plan - Editable Contact Info, Map integration, & Homepage Message Notifications
 
-We will expand the admin dashboard to enable full-page editing and image uploads, rename all references of "Portfolio" to "Work", optimize the DB connection loading screen to fade out immediately upon connection, and include all subpages in the production build.
+We will make the contact page details (email, phone, address, and map iframe) fully editable in the Admin panel, integrate a styled Map section on the Contact page, and build a glassmorphic toast notification on the homepage for new unread messages that disappears after being seen.
 
 ## Proposed Changes
 
-### 1. Server-Side Image Uploads & Static Routes
+### 1. Database & Server (server.js)
 #### [MODIFY] [`server.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server.js)
-- Import `fs` module to handle filesystem writes.
-- Serve uploaded files statically at route `/uploads` from the local `public/uploads/` directory.
-- Add an authenticated admin route `POST /api/upload` that decodes base64 data URLs, saves them as image files inside `public/uploads/`, and returns the static URL `/uploads/upload_timestamp.extension`.
+- Update `GET /api/messages/unread-count` to check user roles:
+  - If admin: return count of all messages where `readByAdmin: false`.
+  - If user: return count of user's messages where `readByUser: false`.
+- Add `PUT /api/messages/read-all` endpoint to mark all unread messages as read for the logged-in user or admin.
 
-### 2. Build Configuration & Page Inclusion
-#### [MODIFY] [`vite.config.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/vite.config.js)
-- Update `rollupOptions.input` to compile `privacy.html`, `terms.html`, and `refund.html` into the production `dist` directory.
-- Rename the input entry `portfolio: 'portfolio.html'` to `work: 'work.html'`.
+### 2. Contact Page Integration
+#### [MODIFY] [`contact.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.html)
+- Add IDs `contact-email`, `contact-phone`, and `contact-address` to the contact details column.
+- Insert a hidden phone item container (`#contact-phone-container`) that displays when a phone number is set.
+- Insert a map container (`#contact-map-container`) with a Google Maps iframe (`#contact-map`) below the main contact forms grid.
 
-### 3. File Renaming (Portfolio to Work)
-- Rename `portfolio.html` to `work.html` and `portfolio.js` to `work.js`.
-- Recreate the portfolio content under `work.html` and `work.js` with all text/titles changed from "Portfolio" to "Work".
-- Set the data loading key to `page-work` instead of `page-portfolio`.
+#### [MODIFY] [`contact.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.js)
+- Add a `loadContactInfo()` function to fetch `contact-info` Content from the backend.
+- Dynamically populate email text, phone number (toggling container visibility), address, and the map iframe src.
+- Trigger `loadContactInfo()` concurrently inside `init()` alongside the page intro loader.
 
-### 4. Navigation & Footer Updates
-#### [MODIFY] Navigation Links in All Pages
-- Update footer and header links from `portfolio.html` to `work.html` and labels from "Portfolio" to "Work" in:
-  - [`index.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/index.html)
-  - [`services.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.html)
-  - [`contact.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.html)
-  - [`profile.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.html)
-  - [`privacy.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/privacy.html)
-  - [`terms.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/terms.html)
-  - [`refund.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/refund.html)
-  - [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html)
-- Ensure all footers have the `Socials` column block with elements matching IDs `social-linkedin` and `social-github`.
-
-### 5. Admin Dashboard Features
+### 3. Admin Content Editors
 #### [MODIFY] [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html)
-- Add upload file inputs next to the image URL fields in:
-  - Hero Content form
-  - Pricing Packages form
-  - Recent Works form
-- Add a new option `<option value="socials">Social Links</option>` to the page selector dropdown under the "Edit Pages" tab.
-- Rename "Portfolio Page" option to "Work Page" (value `page-work`).
-#### [MODIFY] [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js)
-- Add a global event listener to handle file selection, convert it to base64, send it to `POST /api/upload`, and set the returned URL to the respective form input.
-- Customize the page selector change handler so that when `socials` is selected, the page form inputs adapt to LinkedIn URL (Title) and GitHub URL (Content) with updated label names.
-- Update references of `page-portfolio` to `page-work`.
+- Add a new option `<option value="contact-info">Contact Details (Email, Phone, Address, Map)</option>` to the page selector dropdown.
+- Group the standard title/content forms inside a wrapper div (`#standardPageFields`).
+- Add a new inputs wrapper div (`#contactInfoFields`) containing form fields for Contact Email, Contact Phone, Contact Address, and Google Maps Embed URL.
 
-### 6. Loader Speed & Smooth Zoom Animations
-#### [MODIFY] [`db-check.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/db-check.js)
-- Add a dynamic `loadSocialLinks` function that fetches `/api/content/socials` and populates the links in the footer.
-- Trigger `loadSocialLinks` automatically in `hideLoadingScreen()`.
+#### [MODIFY] [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js)
+- Handle selection of the `contact-info` key:
+  - Hide standard textfields and show custom contact textfields.
+  - Disable standard validation required properties.
+- Update page content loading and save handlers to populate and submit email/phone/address/map URL values under the single `contact-info` DB key mapping.
+
+### 4. Homepage Message Notifications
 #### [MODIFY] [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css)
-- Add smooth transitions (`transform` and `opacity` over `0.5s`) to `.loading-overlay`.
-- Apply a slight zoom-out/fade-out animation (`transform: scale(1.05); opacity: 0;`) to `.loading-overlay.fade-out` for a premium transition effect.
-#### [MODIFY] Init Methods in Page Scripts
-- In [`app.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/app.js), [`services.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.js), [`work.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/work.js), [`contact.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.js), [`profile.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.js), and [`policy.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/policy.js):
-  - Call `hideLoadingScreen()` immediately after `checkDB()` returns `true` so the loader disappears instantly.
-  - Load the page content concurrently (using parallel promises or async processes) so the page visual layout is interactive immediately.
+- Implement CSS classes for `.toast-notification` with glassmorphic styling (`backdrop-filter: blur(10px)`), borders, entrance slide-up/fade-in, and dismissal exit animations.
+
+#### [MODIFY] [`app.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/app.js)
+- Add a `checkMessageNotifications()` function that queries `/api/messages/unread-count` if a user is authenticated.
+- If `unreadCount > 0`, create a floating glassmorphic toast notification component at the bottom-right of the screen after 1.5 seconds delay.
+- Display custom text:
+  - Admin: "You have X new messages from clients."
+  - User: "You have X new replies on your threads."
+- Wire click handlers for the CTA link (redirecting to admin/profile) and close button. Both actions trigger `PUT /api/messages/read-all` so the notifications disappear permanently until new messages are received.
 
 ---
 
 ## Verification Plan
 
-### Automated Build Verification
-- Run `npm run build` to confirm all html pages compile successfully and exist in `dist/`.
+### Automated Verification
+- Run `npm run build` to confirm compiling is successful.
 
-### Manual Testing
-- **Loader Speed**: Open the homepage and subpages, verify the loader dismisses immediately once connected, fading out with a smooth zoom transition.
-- **Image Uploader**: Open Admin Panel, upload an image in Hero Content, verify the URL is auto-filled (e.g. `/uploads/upload_...png`) and saves correctly.
-- **Edit Pages & Socials**: Change the Services page content and the Social links. Confirm the updates appear on the frontend footer and Services page in real-time.
-- **Work Page**: Open the new `work.html` page and verify it renders portfolio projects under the "Work" naming system.
+### Manual Verification
+- **Admin Edit Contact Details**: Go to the Admin dashboard, edit Contact details under the selector tab, save, and confirm changes show up on the Contact page immediately.
+- **Contact Map**: Verify the Google Map iframe is shown on `contact.html` with the custom admin-configured link.
+- **Unread Notification**:
+  - Send a message from contact page as guest.
+  - Log in as admin, check if a notification toast appears on the homepage saying "You have 1 new messages from clients."
+  - Dismiss/close the toast, reload the page, and verify the notification does not show again.

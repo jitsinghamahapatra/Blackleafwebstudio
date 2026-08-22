@@ -607,13 +607,32 @@ app.get('/api/messages/my', auth, async (req, res) => {
   }
 });
 
-// GET /api/messages/unread-count -> Get count of unread replies
+// GET /api/messages/unread-count -> Get count of unread replies/messages
 app.get('/api/messages/unread-count', auth, async (req, res) => {
   try {
-    const unreadCount = await Message.countDocuments({ uid: req.user.id, readByUser: false });
+    let unreadCount = 0;
+    if (req.user.role === 'admin') {
+      unreadCount = await Message.countDocuments({ readByAdmin: false });
+    } else {
+      unreadCount = await Message.countDocuments({ uid: req.user.id, readByUser: false });
+    }
     res.json({ unreadCount });
   } catch (err) {
     res.status(500).json({ message: 'Server error checking unread messages' });
+  }
+});
+
+// PUT /api/messages/read-all -> Mark all unread messages as read
+app.put('/api/messages/read-all', auth, async (req, res) => {
+  try {
+    if (req.user.role === 'admin') {
+      await Message.updateMany({ readByAdmin: false }, { readByAdmin: true });
+    } else {
+      await Message.updateMany({ uid: req.user.id, readByUser: false }, { readByUser: true });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error marking all read' });
   }
 });
 

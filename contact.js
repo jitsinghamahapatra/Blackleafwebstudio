@@ -362,7 +362,46 @@ async function init() {
     restoreSession();
     setupTrackOrder();
 
-    loadPageIntroContent('page-contact').catch(err => console.error("Error loading contact intro:", err));
+    Promise.all([
+        loadPageIntroContent('page-contact'),
+        loadContactInfo()
+    ]).catch(err => console.error("Error loading contact page elements:", err));
+}
+
+async function loadContactInfo() {
+    try {
+        const res = await fetch("/api/content/contact-info");
+        if (res.ok) {
+            const data = await res.json();
+            const emailEl = document.getElementById("contact-email");
+            const phoneEl = document.getElementById("contact-phone");
+            const phoneContainer = document.getElementById("contact-phone-container");
+            const addressEl = document.getElementById("contact-address");
+            const mapEl = document.getElementById("contact-map");
+            const mapContainer = document.getElementById("contact-map-container");
+
+            if (emailEl && data.title) {
+                emailEl.textContent = data.title;
+            }
+            if (phoneEl && data.desc) {
+                phoneEl.textContent = data.desc;
+                if (phoneContainer) phoneContainer.style.display = "flex";
+            } else if (phoneContainer) {
+                phoneContainer.style.display = "none";
+            }
+            if (addressEl && data.priceTag) {
+                addressEl.textContent = data.priceTag;
+            }
+            if (mapEl && data.img) {
+                mapEl.src = data.img;
+                if (mapContainer) mapContainer.style.display = "block";
+            } else if (mapContainer) {
+                mapContainer.style.display = "none";
+            }
+        }
+    } catch (err) {
+        console.error("Error loading contact info:", err);
+    }
 }
 
 async function loadPageIntroContent(key) {
