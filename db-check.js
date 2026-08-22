@@ -19,9 +19,25 @@ export async function checkDB() {
   }
 }
 
+export async function loadSocialLinks() {
+  try {
+    const res = await fetch('/api/content/socials');
+    if (res.ok) {
+      const data = await res.json();
+      const linkedinEl = document.getElementById('social-linkedin');
+      const githubEl = document.getElementById('social-github');
+      if (linkedinEl && data.title) linkedinEl.href = data.title;
+      if (githubEl && data.desc) githubEl.href = data.desc;
+    }
+  } catch (err) {
+    console.error('Failed to load social links:', err);
+  }
+}
+
 export function hideLoadingScreen() {
   const overlayEl = document.getElementById('db-loading-screen');
   if (overlayEl) {
     overlayEl.classList.add('fade-out');
   }
+  loadSocialLinks();
 }

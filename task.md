@@ -1,9 +1,11 @@
-- [x] Add `GET /api/db-status` in `server.js`
-- [x] Create `db-check.js` shared module
-- [x] Create `policy.js` dynamic policy loader
-- [x] Create `terms.html`, `privacy.html`, and `refund.html` policy pages
-- [x] Update `admin.html` with the new Pages Editing tab & loading screen markup
-- [x] Update `admin.js` to load, select, and save policy content
-- [x] Inject loading screen markup & update legal footer links in index, services, portfolio, contact, and profile HTML files
-- [x] Update index, services, portfolio, contact, and profile JS files to run the DB check and loading screen fadeout
-- [/] Verify database loading screen, DB failures/retry state, and policy editing in the admin panel
+- [x] Implement static `/uploads` serving & `POST /api/upload` base64 image uploader in `server.js`
+- [x] Rename `portfolio.html` to `work.html` and `portfolio.js` to `work.js`
+- [x] Update `vite.config.js` to rename portfolio input and include terms, privacy, and refund pages
+- [x] Update navigation links and text labels (Portfolio -> Work) in all HTML pages
+- [x] Add the Socials column to all page footers
+- [x] Update `admin.html` with file uploads and the socials option in page selector
+- [x] Update `admin.js` with base64 image uploader, socials selector, and portfolio-to-work renames
+- [x] Update `db-check.js` to load social links dynamically on loader hide
+- [x] Optimize loader speed (hide immediately on DB success) in all page scripts
+- [x] Add smooth scale zoom-out & fade-out transitions to `.loading-overlay` in `style.css`
+- [x] Verify the build and check functionalities in local dev server

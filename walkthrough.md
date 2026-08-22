@@ -1,50 +1,62 @@
-# Walkthrough - Updates and Verification
+# Walkthrough - Admin Panel, Portfolio Rename, Loader Optimization & Build Configuration
 
-We have updated the environment configuration with your active Firebase project credentials and customized the preloader styling to show only the loader on a creamy page.
+We have successfully completed all parts of the implementation plan! The site builds successfully, the admin dashboard supports editing all pages and uploading images, database loaders dismiss immediately upon connection check, and the portfolio has been completely renamed to "Work".
 
 ## Changes Made
 
-### 1. Updated [`.env`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/.env)
-We replaced the old demo credentials with the active Firebase credentials you supplied:
-- **API Key**: `AIzaSyCa1iZ2PRoaDY3ZNOufvHM88vEETfbFjxk`
-- **Auth Domain**: `blackleafwebstudios.firebaseapp.com`
-- **Project ID**: `blackleafwebstudios`
-- **Storage Bucket**: `blackleafwebstudios.firebasestorage.app`
-- **Messaging SenderId**: `728897288758`
-- **App ID**: `1:728897288758:web:b379cda323a010abb1f697`
-- **Measurement ID**: `G-X1S6K05KTB`
+### 1. Server-Side Image Uploads & Static Routes
+- Added `POST /api/upload` endpoint in [`server.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server.js) that decodes base64-encoded image files and saves them to the local `public/uploads` directory.
+- Configured Express static serving for `/uploads` route pointing to `public/uploads` in [`server.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server.js).
 
-### 2. Loader Styling in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css)
-Modified the database connection loading overlay styles to simplify the appearance:
-- Changed the loading screen background from a dark theme (`#111111`) to a cream color (`var(--bg-cream, #f9f7f2)`) matching the site theme.
-- Removed the dark wrapper box (`.loading-box`), shadows, and borders during normal load.
-- Hid the "Blackleaf" logo and "Connecting to secure database..." status text by default.
-- Kept error card layout structure only if database connection fails (`error-state`), displaying the error text and retry buttons when needed.
+### 2. Rename Portfolio to Work
+- Renamed the physical files `portfolio.html` and `portfolio.js` to `work.html` and `work.js` via Git.
+- Updated database keys in [`work.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/work.js) from `page-portfolio` to `page-work`.
+- Updated Rollup inputs in [`vite.config.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/vite.config.js) to build `work: 'work.html'`.
+- Changed page links and navigation labels from `portfolio.html` ("Portfolio") to `work.html` ("Work") inside all navigation bars and footers across:
+  - [`index.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/index.html)
+  - [`services.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/services.html)
+  - [`contact.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.html)
+  - [`profile.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/profile.html)
+  - [`privacy.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/privacy.html)
+  - [`terms.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/terms.html)
+  - [`refund.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/refund.html)
+
+### 3. Extended Page Content & Socials Editor
+- Added a "Social Links" (`socials`) editor option to the Page selector dropdown in [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html).
+- Added logic in [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js) to dynamically change labels from "Page Title" and "Page Content" to "LinkedIn URL" and "GitHub URL" when the socials editor is chosen.
+- Added a socials footer column to all page footers dynamically loaded from database key `socials` via the shared [`db-check.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/db-check.js) utility.
+
+### 4. Admin Image Upload Fields
+- Integrated file input buttons styled next to the image URL text inputs in [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html) for Hero Content, Pricing Packages, and Recent Works forms.
+- Added a change event listener in [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js) that intercepts file selections, uploads the image data to `/api/upload` via base64, and updates the URL field.
+
+### 5. Optimized Database Loader Screen
+- Modified the shared loading screen controller [`db-check.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/db-check.js) to trigger `hideLoadingScreen()` immediately on database connection verification.
+- Converted all page scripts (`app.js`, `services.js`, `work.js`, `contact.js`, `profile.js`, `policy.js`) to call `hideLoadingScreen()` immediately and load other page content concurrently.
+- Added CSS classes in [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css) that apply a premium scale zoom-out and opacity fade-out transition (`transform: scale(1.05); opacity: 0;`) when hiding the database loading overlay.
+
+### 6. Production Compilation
+- Updated [`vite.config.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/vite.config.js) to compile `privacy.html`, `terms.html`, and `refund.html` into the production `dist/` directory.
 
 ---
 
 ## Verification Results
 
-### Page Display and Layout
-We verified that the web application renders all page layouts correctly. Below is a screenshot of the homepage after loading:
-
-![Homepage Layout](file:///C:/Users/jitsi/.gemini/antigravity-ide/brain/9ff9ae4f-e66b-4cec-9634-1e5b9f9d1aef/initial_check_1787319109795.png)
-
-1. **Page Rendering**: The main page content, including the canvas graphics, header, navigation, and packages section are fully loaded and rendering.
-2. **Navigation**: All navigation links work (Home, Services, Contact, Track Order, Login modals are operational).
-
-### Loader Screen Verification
-The updated loader screen is clean and displays only the teal spinner centered on a cream background:
-
-![Loader Screen Layout](file:///C:/Users/jitsi/.gemini/antigravity-ide/brain/9ff9ae4f-e66b-4cec-9634-1e5b9f9d1aef/loader_visible_1787321093493.png)
-
-### Firebase Status in Browser Console
-During our analysis of the page load:
-- The browser successfully receives the updated Firebase API key.
-- The console reports: `FirebaseError: Firebase: Error (auth/invalid-api-key)`. 
-- **Cause**: This error occurs when the Firebase library initializes with the provided API key but the key is rejected by the Google Identity/Firebase server. This could be due to API key restrictions in Google Cloud Console or key propagation delay.
-
----
-
-## Recommended Action
-Please double-check the API key settings in your Google Cloud Console / Firebase Console under **APIs & Services > Credentials** to ensure it is enabled for the Identity/Auth service and does not have domain restrictions preventing it from running on `localhost`.
+### Automated Build Output
+Run `npm run build`:
+```bash
+vite v8.0.3 building client environment for production...
+transforming...✓ 23 modules transformed.
+rendering chunks...
+dist/refund.html                                               9.25 kB
+dist/privacy.html                                              9.25 kB
+dist/terms.html                                                9.26 kB
+dist/work.html                                                11.83 kB
+dist/contact.html                                             13.34 kB
+dist/admin.html                                               15.39 kB
+dist/services.html                                            19.77 kB
+dist/profile.html                                             21.87 kB
+dist/index.html                                               27.62 kB
+✓ built in 611ms
+```
+The build completed successfully and output all pages inside the production `dist/` directory.

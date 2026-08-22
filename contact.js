@@ -356,12 +356,13 @@ async function init() {
     const isDbConnected = await checkDB();
     if (!isDbConnected) return;
 
-    if (window.loadThemeSettings) await window.loadThemeSettings();
-    await restoreSession();
-    await loadPageIntroContent('page-contact');
+    hideLoadingScreen();
+
+    if (window.loadThemeSettings) window.loadThemeSettings();
+    restoreSession();
     setupTrackOrder();
 
-    hideLoadingScreen();
+    loadPageIntroContent('page-contact').catch(err => console.error("Error loading contact intro:", err));
 }
 
 async function loadPageIntroContent(key) {

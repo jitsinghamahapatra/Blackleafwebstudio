@@ -45,31 +45,30 @@ async function initPolicyPage() {
         `;
     }
 
+    hideLoadingScreen();
+
     if (key) {
-        try {
-            const res = await fetch(`/api/content/${key}`);
-            if (res.ok) {
-                const data = await res.json();
+        fetch(`/api/content/${key}`)
+            .then(async res => {
                 const titleEl = document.getElementById('policy-title');
                 const contentEl = document.getElementById('policy-content');
-                if (titleEl) titleEl.innerHTML = data.title || defaultTitle;
-                if (contentEl) contentEl.innerHTML = data.desc || defaultContent;
-            } else {
+                if (res.ok) {
+                    const data = await res.json();
+                    if (titleEl) titleEl.innerHTML = data.title || defaultTitle;
+                    if (contentEl) contentEl.innerHTML = data.desc || defaultContent;
+                } else {
+                    if (titleEl) titleEl.innerHTML = defaultTitle;
+                    if (contentEl) contentEl.innerHTML = defaultContent;
+                }
+            })
+            .catch(err => {
+                console.error("Failed to fetch policy page", err);
                 const titleEl = document.getElementById('policy-title');
                 const contentEl = document.getElementById('policy-content');
                 if (titleEl) titleEl.innerHTML = defaultTitle;
                 if (contentEl) contentEl.innerHTML = defaultContent;
-            }
-        } catch (err) {
-            console.error("Failed to fetch policy page", err);
-            const titleEl = document.getElementById('policy-title');
-            const contentEl = document.getElementById('policy-content');
-            if (titleEl) titleEl.innerHTML = defaultTitle;
-            if (contentEl) contentEl.innerHTML = defaultContent;
-        }
+            });
     }
-
-    hideLoadingScreen();
 }
 
 document.addEventListener('DOMContentLoaded', initPolicyPage);

@@ -304,8 +304,8 @@ async function loadProjects() {
         allProjects = await res.json();
         renderProjects("all");
     } catch (err) {
-        console.error("Error loading portfolio projects", err);
-        portfolioGrid.innerHTML = `<p style="text-align: center; grid-column:1/-1; opacity:0.6;">Failed to load portfolio items.</p>`;
+        console.error("Error loading work projects", err);
+        portfolioGrid.innerHTML = `<p style="text-align: center; grid-column:1/-1; opacity:0.6;">Failed to load work items.</p>`;
     }
 }
 
@@ -367,13 +367,16 @@ async function init() {
     const isDbConnected = await checkDB();
     if (!isDbConnected) return;
 
-    if (window.loadThemeSettings) await window.loadThemeSettings();
-    await restoreSession();
-    await loadProjects();
-    await loadPageIntroContent('page-portfolio');
+    hideLoadingScreen();
+
+    if (window.loadThemeSettings) window.loadThemeSettings();
+    restoreSession();
     setupTrackOrder();
 
-    hideLoadingScreen();
+    Promise.all([
+        loadProjects(),
+        loadPageIntroContent('page-work')
+    ]).catch(err => console.error("Error loading work elements:", err));
 }
 
 async function loadPageIntroContent(key) {

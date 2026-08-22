@@ -836,6 +836,19 @@ const adminPageContent = document.getElementById("adminPageContent");
 async function loadSelectedPageContent() {
     if (!adminPageSelect) return;
     const key = adminPageSelect.value;
+    
+    // Update labels dynamically based on selection
+    const titleLabel = document.querySelector('label[for="adminPageTitle"]') || document.querySelector('#adminPageForm label:nth-of-type(1)');
+    const contentLabel = document.querySelector('label[for="adminPageContent"]') || document.querySelector('#adminPageForm label:nth-of-type(2)');
+    
+    if (key === "socials") {
+        if (titleLabel) titleLabel.textContent = "LinkedIn URL";
+        if (contentLabel) contentLabel.textContent = "GitHub URL";
+    } else {
+        if (titleLabel) titleLabel.textContent = "Page Title";
+        if (contentLabel) contentLabel.textContent = "Page Content (HTML/Paragraphs allowed)";
+    }
+
     try {
         const res = await fetch(`/api/content/${key}`);
         if (res.ok) {
@@ -862,9 +875,12 @@ async function loadSelectedPageContent() {
             } else if (key === "page-contact") {
                 adminPageTitle.value = "Contact - Intro Text";
                 adminPageContent.value = "Have a project in mind? Reach out and let's build something great together.";
-            } else if (key === "page-portfolio") {
-                adminPageTitle.value = "Portfolio - Section Intro";
+            } else if (key === "page-work") {
+                adminPageTitle.value = "Work - Section Intro";
                 adminPageContent.value = "A selection of hand-crafted websites and digital projects we've built for clients.";
+            } else if (key === "socials") {
+                adminPageTitle.value = "https://www.linkedin.com/in/jitsinghamahapatra/";
+                adminPageContent.value = "https://github.com/jitsinghamahapatra";
             }
         }
     } catch (err) {
@@ -903,6 +919,56 @@ if (adminPageForm) {
         }
     });
 }
+
+// Image Upload Handler
+document.addEventListener("change", async (e) => {
+    if (e.target && e.target.classList.contains("admin-file-upload")) {
+        const fileInput = e.target;
+        const targetInputId = fileInput.getAttribute("data-target");
+        const targetInput = document.getElementById(targetInputId);
+        
+        if (fileInput.files.length === 0) return;
+        const file = fileInput.files[0];
+        
+        // Show loading status on the label
+        const label = fileInput.parentElement;
+        const originalHTML = label.innerHTML;
+        label.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading...<input type="file" class="admin-file-upload" data-target="${targetInputId}" style="display: none;" accept="image/*">`;
+        
+        // Read file as base64 Data URL
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            try {
+                const res = await fetch("/api/upload", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ image: reader.result })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    if (targetInput) {
+                        targetInput.value = data.imageUrl;
+                        targetInput.dispatchEvent(new Event("change"));
+                    }
+                    window.customAlert("Image uploaded successfully!");
+                } else {
+                    const errData = await res.json();
+                    window.customAlert(errData.message || "Failed to upload image", true);
+                }
+            } catch (err) {
+                console.error("Upload error", err);
+                window.customAlert("Failed to upload image due to connection error", true);
+            } finally {
+                label.innerHTML = originalHTML;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
 
 // Check admin session on startup
 checkAdminAccess();

@@ -719,14 +719,17 @@ async function init() {
     const isDbConnected = await checkDB();
     if (!isDbConnected) return;
 
-    if (window.loadThemeSettings) await window.loadThemeSettings();
-    await restoreSession();
-    await loadContent();
-    await loadPackages();
-    await loadProjects();
+    hideLoadingScreen();
+
+    if (window.loadThemeSettings) window.loadThemeSettings();
+    restoreSession();
     setupTrackOrder();
 
-    hideLoadingScreen();
+    Promise.all([
+        loadContent(),
+        loadPackages(),
+        loadProjects()
+    ]).catch(err => console.error("Error loading homepage elements:", err));
 }
 
 async function loadPageIntroContent(key) {

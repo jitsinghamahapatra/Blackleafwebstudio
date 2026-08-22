@@ -34,9 +34,12 @@ export default defineConfig(({ mode }) => {
           main: 'index.html',
           admin: 'admin.html',
           services: 'services.html',
-          portfolio: 'portfolio.html',
+          work: 'work.html',
           contact: 'contact.html',
-          profile: 'profile.html'
+          profile: 'profile.html',
+          privacy: 'privacy.html',
+          terms: 'terms.html',
+          refund: 'refund.html'
         }
       }
     }

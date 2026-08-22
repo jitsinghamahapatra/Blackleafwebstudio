@@ -95,7 +95,13 @@
                     <textarea id="adminHeroDesc" class="form-input" rows="3"></textarea>
                     
                     <label>Hero Image URL</label>
-                    <input type="text" id="adminHeroImg" class="form-input" placeholder="/images/image.png">
+                    <div class="upload-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="adminHeroImg" class="form-input" placeholder="/images/image.png" style="flex: 1; margin-bottom: 0;">
+                        <label class="btn-request" style="margin: 0; padding: 10px 15px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; white-space: nowrap;">
+                            <i class="fa-solid fa-upload"></i> Upload
+                            <input type="file" class="admin-file-upload" data-target="adminHeroImg" style="display: none;" accept="image/*">
+                        </label>
+                    </div>
                     
                     <button type="submit" class="btn-request">Save Content</button>
                 </form>
@@ -109,7 +115,13 @@
                     <input type="text" id="pkgId" class="form-input" placeholder="ID (e.g. 1, 2, 3)" required>
                     <input type="text" id="pkgName" class="form-input" placeholder="Package Name" required>
                     <input type="text" id="pkgPrice" class="form-input" placeholder="Price (e.g. $249)" required>
-                    <input type="text" id="pkgImg" class="form-input" placeholder="Image URL">
+                    <div class="upload-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="pkgImg" class="form-input" placeholder="Image URL" style="flex: 1; margin-bottom: 0;">
+                        <label class="btn-request" style="margin: 0; padding: 10px 15px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; white-space: nowrap;">
+                            <i class="fa-solid fa-upload"></i> Upload
+                            <input type="file" class="admin-file-upload" data-target="pkgImg" style="display: none;" accept="image/*">
+                        </label>
+                    </div>
                     <textarea id="pkgFeatures" class="form-input" rows="3" placeholder="Comma separated features"></textarea>
                     <div class="form-actions">
                         <button type="submit" id="pkgSubmitBtn" class="btn-request">Save Package</button>
@@ -129,7 +141,13 @@
                     <h3 id="projFormTitle">Add New Project</h3>
                     <input type="text" id="projTitle" class="form-input" placeholder="Project Title" required>
                     <textarea id="projDesc" class="form-input" rows="2" placeholder="Project Description (Optional)"></textarea>
-                    <input type="text" id="projImg" class="form-input" placeholder="Image URL (Optional - auto-fetches website screenshot if blank)">
+                    <div class="upload-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="projImg" class="form-input" placeholder="Image URL (Optional - auto-fetches website screenshot if blank)" style="flex: 1; margin-bottom: 0;">
+                        <label class="btn-request" style="margin: 0; padding: 10px 15px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; white-space: nowrap;">
+                            <i class="fa-solid fa-upload"></i> Upload
+                            <input type="file" class="admin-file-upload" data-target="projImg" style="display: none;" accept="image/*">
+                        </label>
+                    </div>
                     <input type="text" id="projLink" class="form-input" placeholder="Project URL (e.g. https://...)" required>
                     <div class="form-actions">
                         <button type="submit" id="projSubmitBtn" class="btn-request">Add Project</button>
@@ -179,7 +197,8 @@
                             <option value="page-home">Home Page</option>
                             <option value="page-services">Services Page</option>
                             <option value="page-contact">Contact Page</option>
-                            <option value="page-portfolio">Portfolio Page</option>
+                            <option value="page-work">Work Page</option>
+                            <option value="socials">Social Links</option>
                         </optgroup>
                     </select>
                     

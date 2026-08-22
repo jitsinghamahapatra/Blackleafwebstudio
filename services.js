@@ -442,13 +442,16 @@ async function init() {
     const isDbConnected = await checkDB();
     if (!isDbConnected) return;
 
-    if (window.loadThemeSettings) await window.loadThemeSettings();
-    await restoreSession();
-    await loadPackages();
-    await loadPageIntroContent('page-services');
+    hideLoadingScreen();
+
+    if (window.loadThemeSettings) window.loadThemeSettings();
+    restoreSession();
     setupTrackOrder();
 
-    hideLoadingScreen();
+    Promise.all([
+        loadPackages(),
+        loadPageIntroContent('page-services')
+    ]).catch(err => console.error("Error loading services elements:", err));
 }
 
 async function loadPageIntroContent(key) {
