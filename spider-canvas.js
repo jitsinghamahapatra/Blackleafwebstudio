@@ -204,7 +204,7 @@ VerletJS.prototype.crawl = function(leg) {
   
   if (paths.length > 0) {
     shuffle(paths);
-    spider.constraints.push(new DistanceConstraint(spider.legs[leg], paths[0], 1, 0));
+    spider.constraints.push(new DistanceConstraint(spider.legs[leg], paths[0], 0.75, 0));
   }
 };
 
@@ -271,6 +271,8 @@ document.addEventListener("DOMContentLoaded", function() {
   var canvas = document.getElementById("web");
   if (!canvas) return;
 
+  var isMobile = window.innerWidth <= 768;
+
   // Dynamic coordinates matching the hero section dimensions
   var hero = document.querySelector(".hero");
   if (!hero) return;
@@ -280,6 +282,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Set resolution with dpr for high-quality retina rendering
   var dpr = window.devicePixelRatio || 1;
+  if (isMobile) {
+    dpr = Math.min(dpr, 1.5); // Cap DPR on mobile/tablet to prevent massive canvas performance drop
+  }
   canvas.width = width * dpr;
   canvas.height = height * dpr;
   canvas.style.width = width + "px";
@@ -290,6 +295,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Setup simulation
   var sim = new VerletJS(width, height, canvas);
+  sim.friction = 0.99; // Higher damping (default is 0.99) to make the simulation feel sluggish/sticky
+  sim.gravity = new Vec2(0, .10); // Lower gravity (default is 0.2) to make the spider cling tighter without sagging
   
   // Extend/Override interaction for responsive scaling & add touch events
   var _this = sim;
@@ -388,11 +395,20 @@ document.addEventListener("DOMContentLoaded", function() {
     _this.draggedEntity = null;
   };
 
-  // Generate spiderweb centered in the hero section
-  var spiderweb = sim.spiderweb(new Vec2(width / 2, height / 2), Math.min(width, height) / 2.2, 20, 7);
+  // Adjust origin, segments, and depth dynamically for performance on mobile
+  var centerY = height / 2;
+  if (isMobile) {
+    centerY += 50; // Shift spiderweb down on mobile
+  }
+
+  var webSegments = isMobile ? 16 : 20;
+  var webDepth = isMobile ? 5 : 7;
+
+  // Generate spiderweb centered in the hero section (shifted down on mobile)
+  var spiderweb = sim.spiderweb(new Vec2(width / 2, centerY), Math.min(width, height) / 2.2, webSegments, webDepth);
 
   // Generate spider at the center of the web
-  var spider = sim.spider(new Vec2(width / 2, height / 2));
+  var spider = sim.spider(new Vec2(width / 2, centerY));
 
   // Pre-attach all 8 legs so the spider starts fully suspended on the web
   for (var l = 0; l < 8; ++l) {
@@ -492,11 +508,17 @@ document.addEventListener("DOMContentLoaded", function() {
   var loop = function() {
     ti++;
     
-    if (Math.floor(Math.random() * 4) === 0) {
+    // Crawl less frequently to slow down the spider's overall movement
+    var crawlChance = (window.innerWidth <= 768) ? 10 : 6;
+    if (Math.floor(Math.random() * crawlChance) === 0) {
       sim.crawl(((legIndex++) * 3) % 8);
     }
     
-    sim.frame(16);
+    if (window.innerWidth <= 768) {
+      sim.frame(6); // Fewer steps for better performance on mobile/tablet
+    } else {
+      sim.frame(16); // Standard physics steps on desktop (keeps normal speed, not sub-stepped)
+    }
     
     // Override: ensure the dragged entity tracks the cursor exactly and is not pulled back by constraints
     if (sim.draggedEntity) {
@@ -511,7 +533,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Track old center coordinates for shifting assemblies on resize
   var oldCenterX = width / 2;
-  var oldCenterY = height / 2;
+  var oldCenterY = isMobile ? (height / 2 + 50) : (height / 2);
 
   // Handle window resizing dynamically to adjust canvas resolution and physics boundaries
   window.addEventListener("resize", function() {
@@ -530,8 +552,9 @@ document.addEventListener("DOMContentLoaded", function() {
     sim.height = height;
     
     // Shift web and spider to the new center dynamically on viewport changes
+    var isMobileNow = window.innerWidth <= 768;
     var newCenterX = width / 2;
-    var newCenterY = height / 2;
+    var newCenterY = isMobileNow ? (height / 2 + 50) : (height / 2);
     var dx = newCenterX - oldCenterX;
     var dy = newCenterY - oldCenterY;
     

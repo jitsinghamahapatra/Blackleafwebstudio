@@ -817,6 +817,32 @@ label {
 }
 
 /* ============================= */
+/*     RESPONSIVE — TABLET HERO  */
+/* ============================= */
+@media screen and (max-width: 1024px) {
+    .hero-image {
+        display: none !important;
+    }
+    .hero {
+        flex-direction: column;
+        padding: 40px 20px;
+        text-align: center;
+        gap: 40px;
+    }
+    .hero-content {
+        margin-bottom: 0px;
+        text-align: center;
+    }
+    .hero-title {
+        font-size: 3.5rem;
+        transform: none;
+    }
+    .scribble {
+        margin: 10px auto;
+    }
+}
+
+/* ============================= */
 /*     RESPONSIVE — TABLET       */
 /* ============================= */
 @media (max-width: 900px) {
