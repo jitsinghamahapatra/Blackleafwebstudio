@@ -600,7 +600,9 @@ app.get('/api/messages', auth, admin, async (req, res) => {
 // GET /api/messages/my -> Get logged-in user's messages
 app.get('/api/messages/my', auth, async (req, res) => {
   try {
-    const messages = await Message.find({ uid: req.user.id }).sort({ timestamp: -1 });
+    const messages = await Message.find({
+      $or: [ { uid: req.user.id }, { email: req.user.email.toLowerCase() } ]
+    }).sort({ timestamp: -1 });
     res.json(messages);
   } catch (err) {
     res.status(500).json({ message: 'Server error fetching your messages' });
@@ -614,7 +616,10 @@ app.get('/api/messages/unread-count', auth, async (req, res) => {
     if (req.user.role === 'admin') {
       unreadCount = await Message.countDocuments({ readByAdmin: false });
     } else {
-      unreadCount = await Message.countDocuments({ uid: req.user.id, readByUser: false });
+      unreadCount = await Message.countDocuments({
+        $or: [ { uid: req.user.id }, { email: req.user.email.toLowerCase() } ],
+        readByUser: false
+      });
     }
     res.json({ unreadCount });
   } catch (err) {
@@ -628,7 +633,13 @@ app.put('/api/messages/read-all', auth, async (req, res) => {
     if (req.user.role === 'admin') {
       await Message.updateMany({ readByAdmin: false }, { readByAdmin: true });
     } else {
-      await Message.updateMany({ uid: req.user.id, readByUser: false }, { readByUser: true });
+      await Message.updateMany(
+        { 
+          $or: [ { uid: req.user.id }, { email: req.user.email.toLowerCase() } ], 
+          readByUser: false 
+        }, 
+        { readByUser: true }
+      );
     }
     res.json({ success: true });
   } catch (err) {

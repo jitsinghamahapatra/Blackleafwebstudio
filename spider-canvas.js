@@ -271,7 +271,11 @@ document.addEventListener("DOMContentLoaded", function() {
   var canvas = document.getElementById("web");
   if (!canvas) return;
 
-  var isMobile = window.innerWidth <= 768;
+  // Detect mobile device including desktop-mode mobile browsers
+  var isMobile = window.innerWidth <= 768 || 
+                 /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent) || 
+                 ('ontouchstart' in window) || 
+                 (navigator.maxTouchPoints > 0);
 
   // Dynamic coordinates matching the hero section dimensions
   var hero = document.querySelector(".hero");
@@ -401,7 +405,7 @@ document.addEventListener("DOMContentLoaded", function() {
     centerY += 50; // Shift spiderweb down on mobile
   }
 
-  var webSegments = isMobile ? 16 : 20;
+  var webSegments = 20; // Ensure 5 endpoints on both mobile and PC
   var webDepth = isMobile ? 5 : 7;
 
   // Generate spiderweb centered in the hero section (shifted down on mobile)
@@ -415,16 +419,58 @@ document.addEventListener("DOMContentLoaded", function() {
     sim.crawl(l);
   }
 
-  // Custom styling for web points
+  // Subtle, natural dots at web intersections, with 5 big anchor dots at the pins
   spiderweb.drawParticles = function(ctx, composite) {
     var i;
-    for (i in composite.particles) {
+    for (i = 0; i < composite.particles.length; ++i) {
       var point = composite.particles[i];
-      ctx.beginPath();
-      ctx.arc(point.pos.x, point.pos.y, 1.3, 0, 2 * Math.PI);
-      ctx.fillStyle = "#8a9ba8"; // Soft steel blue that complements the studio aesthetic
-      ctx.fill();
+      
+      // Check if this particle is pinned (one of the 5 outer endpoints)
+      var isPinned = false;
+      for (var c = 0; c < composite.constraints.length; ++c) {
+        if (composite.constraints[c] instanceof PinConstraint && composite.constraints[c].a === point) {
+          isPinned = true;
+          break;
+        }
+      }
+      
+      if (isPinned) {
+        // Draw larger architectural anchor point
+        ctx.beginPath();
+        ctx.arc(point.pos.x, point.pos.y, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(25, 25, 25, 0.5)"; // Pinned node
+        ctx.fill();
+        
+        // Subtle outer ring
+        ctx.beginPath();
+        ctx.arc(point.pos.x, point.pos.y, 6, 0, 2 * Math.PI);
+        ctx.strokeStyle = "rgba(25, 25, 25, 0.1)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      } else {
+        // Tiny natural node dot
+        ctx.beginPath();
+        ctx.arc(point.pos.x, point.pos.y, 0.9, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(25, 25, 25, 0.18)";
+        ctx.fill();
+      }
     }
+  };
+
+  // Custom styling for web lines (constraints) - thin and soft for a natural thread look
+  spiderweb.drawConstraints = function(ctx, composite) {
+    var i;
+    ctx.beginPath();
+    for (i in composite.constraints) {
+      var constraint = composite.constraints[i];
+      if (constraint instanceof DistanceConstraint) {
+        ctx.moveTo(constraint.a.pos.x, constraint.a.pos.y);
+        ctx.lineTo(constraint.b.pos.x, constraint.b.pos.y);
+      }
+    }
+    ctx.strokeStyle = "rgba(67, 67, 67, 0.12)"; // Thin, natural dark charcoal thread with soft transparency
+    ctx.lineWidth = 0.7; // Delicate, hair-like thickness
+    ctx.stroke();
   };
 
   // Custom styling for spider and leg constraints
@@ -552,9 +598,8 @@ document.addEventListener("DOMContentLoaded", function() {
     sim.height = height;
     
     // Shift web and spider to the new center dynamically on viewport changes
-    var isMobileNow = window.innerWidth <= 768;
     var newCenterX = width / 2;
-    var newCenterY = isMobileNow ? (height / 2 + 50) : (height / 2);
+    var newCenterY = isMobile ? (height / 2 + 50) : (height / 2);
     var dx = newCenterX - oldCenterX;
     var dy = newCenterY - oldCenterY;
     

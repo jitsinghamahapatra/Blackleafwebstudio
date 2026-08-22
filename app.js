@@ -283,9 +283,12 @@ async function checkUnreadMessages() {
                         dismissToast();
                     };
 
-                    linkEl.onclick = async () => {
+                    linkEl.onclick = async (e) => {
+                        e.preventDefault();
+                        const targetHref = linkEl.href;
                         // Mark as read, then navigate
                         await markAllRead();
+                        window.location.href = targetHref;
                     };
                 }
             } else {
