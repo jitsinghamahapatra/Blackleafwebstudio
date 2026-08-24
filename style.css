@@ -2031,4 +2031,43 @@ label {
     letter-spacing: 2px;
 }
 
-
+/* Wide screens layout & spacing optimizations */
+@media (min-width: 992px) {
+    /* Horizontal process timeline steps */
+    .process-card-stack {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        max-width: 1200px;
+        gap: 30px;
+        padding-bottom: 50px;
+        margin: 60px auto 0;
+    }
+    
+    .process-card-wrapper {
+        flex: 1;
+        margin-bottom: 0;
+        padding-top: 0;
+    }
+    
+    .process-card {
+        width: 100%;
+        min-height: 380px;
+    }
+    
+    .process-splash {
+        left: 10px;
+        top: 24px;
+        bottom: -10px;
+        width: calc(100% - 20px);
+        transform: rotate(3deg);
+    }
+    
+    .process-card-wrapper:nth-child(even) .process-splash {
+        transform: rotate(-3deg);
+        left: 10px;
+    }
+}
+
+
+
