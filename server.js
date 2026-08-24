@@ -116,10 +116,19 @@ app.post('/api/auth/google-login', async (req, res) => {
     }
 
     // If user exists but doesn't have Google ID linked, link it
+    let needsSave = false;
     if (!user.googleId) {
       user.googleId = googleId;
-      await user.save();
+      needsSave = true;
     }
+
+    // Auto-promote to admin if email matches ADMIN_EMAIL (fixes existing accounts)
+    if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && user.role !== 'admin') {
+      user.role = 'admin';
+      needsSave = true;
+    }
+
+    if (needsSave) await user.save();
 
     const token = generateToken(user._id);
     res.json({
@@ -200,6 +209,12 @@ app.post('/api/auth/email-login', async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Auto-promote to admin if email matches ADMIN_EMAIL (fixes existing accounts)
+    if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && user.role !== 'admin') {
+      user.role = 'admin';
+      await user.save();
     }
 
     const token = generateToken(user._id);

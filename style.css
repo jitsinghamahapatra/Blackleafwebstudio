@@ -619,6 +619,91 @@ footer {
     }
 }
 
+/* Auth flip card */
+.auth-flip-scene {
+    width: 90%;
+    max-width: 400px;
+    perspective: 1000px;
+    animation: modal-in 0.3s ease;
+}
+
+.auth-flip-card {
+    position: relative;
+    width: 100%;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.auth-flip-card.flipped {
+    transform: rotateY(180deg);
+}
+
+.auth-flip-face {
+    background: var(--bg-cream);
+    padding: 40px;
+    border: 2px solid var(--ink-black);
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.3);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.auth-flip-face--back {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    transform: rotateY(180deg);
+}
+
+.auth-flip-divider {
+    text-align: center;
+    margin: 12px 0;
+    font-weight: bold;
+    opacity: 0.5;
+    font-size: 0.85rem;
+}
+
+.auth-switch-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: var(--ink-black);
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 0;
+}
+
+.auth-switch-link:hover { opacity: 0.6; }
+
+.auth-google-signup-btn {
+    width: 100%;
+    background: white;
+    color: var(--ink-black);
+    border: 2px solid var(--ink-black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-bottom: 8px;
+}
+
+.auth-google-signup-btn:hover {
+    background: var(--ink-black);
+    color: white;
+}
+
+.auth-google-signup-btn img { width: 20px; }
+
+
 .modal-close {
     position: absolute;
     top: 15px;

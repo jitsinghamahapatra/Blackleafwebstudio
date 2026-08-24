@@ -129,9 +129,18 @@ const closeOrderModal = document.getElementById("closeOrderModal");
 
 // Auth Inputs
 const googleAuthBtn = document.getElementById("googleAuthBtn");
+const googleSignupBtn = document.getElementById("googleSignupBtn");
 const emailAuthBtn = document.getElementById("emailAuthBtn");
 const authEmail = document.getElementById("authEmail");
 const authPassword = document.getElementById("authPassword");
+
+// Flip card
+const authFlipCard = document.getElementById("authFlipCard");
+const showSignupBtn = document.getElementById("showSignupBtn");
+const showLoginBtn = document.getElementById("showLoginBtn");
+
+if (showSignupBtn) showSignupBtn.addEventListener("click", () => authFlipCard && authFlipCard.classList.add("flipped"));
+if (showLoginBtn) showLoginBtn.addEventListener("click", () => authFlipCard && authFlipCard.classList.remove("flipped"));
 
 // Complete Registration Inputs
 const completeRegForm = document.getElementById("completeRegForm");
@@ -150,7 +159,10 @@ let tempGoogleUser = null; // Temp storage during registration completion
 function openModal(modal) { if (modal) modal.classList.add("active"); }
 function closeModal(modal) { if (modal) modal.classList.remove("active"); }
 
-if (closeAuthModal) closeAuthModal.addEventListener("click", () => closeModal(authModal));
+if (closeAuthModal) closeAuthModal.addEventListener("click", () => {
+    closeModal(authModal);
+    if (authFlipCard) authFlipCard.classList.remove("flipped"); // reset to login face
+});
 
 if (closeOrderModal) closeOrderModal.addEventListener("click", () => closeModal(orderModal));
 
@@ -401,7 +413,45 @@ if (googleAuthBtn) {
     });
 }
 
-// Complete Registration details form submit
+// Google Sign-Up Trigger (back face of flip card — same flow as login)
+async function handleGoogleAuth() {
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        const res = await fetch("/api/auth/google-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: user.email, name: user.displayName, googleId: user.uid })
+        });
+        const data = await res.json();
+
+        if (data.isNewUser) {
+            tempGoogleUser = { email: data.email, name: data.name, googleId: data.googleId };
+            if (regEmail) regEmail.value = data.email;
+            if (regName) regName.value = data.name;
+            if (regPhone) regPhone.value = "";
+            if (regPassword) regPassword.value = "";
+            closeModal(authModal);
+            if (authFlipCard) authFlipCard.classList.remove("flipped");
+            openModal(completeRegModal);
+        } else if (data.success) {
+            localStorage.setItem("token", data.token);
+            currentUser = data.user;
+            updateUIState();
+            closeModal(authModal);
+            if (authFlipCard) authFlipCard.classList.remove("flipped");
+            window.customAlert("Logged in successfully!");
+        }
+    } catch (err) {
+        window.customAlert(err.message || "Google authentication failed", true);
+    }
+}
+
+if (googleSignupBtn) googleSignupBtn.addEventListener("click", handleGoogleAuth);
+
+
 if (completeRegForm) {
     completeRegForm.addEventListener("submit", async (e) => {
         e.preventDefault();

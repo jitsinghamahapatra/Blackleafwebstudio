@@ -85,22 +85,33 @@
     <!-- MODALS and global authentication logic -->
     <!-- Authentication Modal -->
     <div id="authModal" class="modal-overlay">
-        <div class="modal-box">
-            <button class="modal-close" id="closeAuthModal"><i class="fa-solid fa-xmark"></i></button>
-            <h2 id="authModalTitle">Log In</h2>
-            <p style="margin-bottom: 20px;">Access your client dashboard.</p>
-            <div class="auth-methods">
-                <button id="googleAuthBtn" class="btn-request" style="width:100%; background:white; color:var(--ink-black); border:2px solid var(--ink-black); margin-bottom:15px;">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px; vertical-align:middle; margin-right:10px;" alt="Google"> Continue with Google
-                </button>
-                <div style="text-align:center; margin:10px 0; font-weight:bold;">— OR —</div>
-                <input type="email" id="authEmail" class="form-input" placeholder="Email Address">
-                <input type="password" id="authPassword" class="form-input" placeholder="Password">
-                <button id="emailAuthBtn" class="btn-request" style="width:100%;">Login with Email</button>
-                <a href="#" id="forgotPassword" class="forgot-password-link">Forgot Password?</a>
-                <p style="text-align:center; margin-top:15px; font-size:0.8rem; color: #666;">
-                    New user? Sign up by clicking "Continue with Google" above.
-                </p>
+        <div class="auth-flip-scene">
+            <div class="auth-flip-card" id="authFlipCard">
+                <!-- FRONT: Login -->
+                <div class="auth-flip-face auth-flip-face--front">
+                    <button class="modal-close" id="closeAuthModal"><i class="fa-solid fa-xmark"></i></button>
+                    <h2 style="margin-bottom:6px;">Log In</h2>
+                    <p style="margin-bottom:20px;opacity:0.65;font-size:0.9rem;">Access your client dashboard.</p>
+                    <button id="googleAuthBtn" class="auth-google-signup-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google
+                    </button>
+                    <div class="auth-flip-divider">-- OR --</div>
+                    <input type="email" id="authEmail" class="form-input" placeholder="Email Address">
+                    <input type="password" id="authPassword" class="form-input" placeholder="Password">
+                    <button id="emailAuthBtn" class="btn-request" style="width:100%;">Login with Email</button>
+                    <a href="#" id="forgotPassword" class="forgot-password-link">Forgot Password?</a>
+                    <button class="auth-switch-link" id="showSignupBtn">New user? <strong>Sign Up</strong></button>
+                </div>
+                <!-- BACK: Sign Up (Google only) -->
+                <div class="auth-flip-face auth-flip-face--back">
+                    <h2 style="margin-bottom:6px;">Create Account</h2>
+                    <p style="margin-bottom:24px;opacity:0.65;font-size:0.9rem;">Sign up instantly with Google.</p>
+                    <button id="googleSignupBtn" class="auth-google-signup-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Sign Up with Google
+                    </button>
+                    <p style="font-size:0.78rem;opacity:0.55;text-align:center;margin-top:12px;">We only use Google to verify your identity.<br>No spam, ever.</p>
+                    <button class="auth-switch-link" id="showLoginBtn">Back to Login</button>
+                </div>
             </div>
         </div>
     </div>
