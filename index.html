@@ -240,23 +240,23 @@
     </section>
 
     <!-- PHILOSOPHY / WHY US SECTION -->
-    <section class="philosophy-section anim-fade-up">
-        <div class="philosophy-header">
+    <section class="philosophy-section">
+        <div class="philosophy-header" data-scroll-reveal="fade-up">
             <h2>No Bloat. Just Code.</h2>
             <p>Why custom hand-coded sites beat page builders every time.</p>
         </div>
         <div class="philosophy-grid">
-            <div class="philosophy-card card-pink">
+            <div class="philosophy-card card-pink" data-scroll-reveal="zoom-up" style="--delay: 0ms">
                 <i class="fa-solid fa-gauge-high"></i>
                 <h3>Blazing Speed</h3>
                 <p>Custom sites load in under 1 second. Drag-and-drop page builders load megabytes of useless Javascript, killing your SEO and conversion rate.</p>
             </div>
-            <div class="philosophy-card card-green">
+            <div class="philosophy-card card-green" data-scroll-reveal="zoom-up" style="--delay: 120ms">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <h3>Bespoke SEO</h3>
                 <p>Clean HTML structure, optimized tags, schema markup, and speed. Google loves custom hand-coded sites far more than bloated templates.</p>
             </div>
-            <div class="philosophy-card card-cream">
+            <div class="philosophy-card card-cream" data-scroll-reveal="zoom-up" style="--delay: 240ms">
                 <i class="fa-solid fa-code"></i>
                 <h3>100% Custom</h3>
                 <p>No templates, no limits. Every pixel, animation, and feature is crafted precisely to match your unique brand identity and goals.</p>
@@ -264,38 +264,55 @@
         </div>
     </section>
 
-    <!-- PROCESS SECTION -->
-    <section class="process-section anim-fade-up">
-        <div class="process-header">
+    <!-- PROCESS SECTION — scroll-in / scroll-out card stack -->
+    <section class="process-section">
+        <div class="process-header" data-scroll-reveal="fade-up">
             <h2>How it Works</h2>
             <p>From initial request to launch in 4 simple steps.</p>
         </div>
-        <div class="process-timeline">
-            <div class="timeline-step">
-                <div class="step-num">01</div>
-                <h4>Select & Request</h4>
-                <p>Choose a package that fits your project. Press 'Order Now' and log in with Google to fill out your project details.</p>
+        <div class="process-card-stack" id="processCardStack">
+
+            <div class="process-card-wrapper" data-step-card>
+                <div class="process-splash" style="background: linear-gradient(306deg, hsl(220,100%,50%), hsl(260,100%,50%))"></div>
+                <div class="process-card">
+                    <div class="step-num">01</div>
+                    <h4>Select &amp; Request</h4>
+                    <p>Choose a package that fits your project. Press 'Order Now' and log in with Google to fill out your project details.</p>
+                </div>
             </div>
-            <div class="timeline-step">
-                <div class="step-num">02</div>
-                <h4>Design Draft</h4>
-                <p>We build a high-fidelity Figma blueprint of your website's home page and user experience layout for your review.</p>
+
+            <div class="process-card-wrapper" data-step-card>
+                <div class="process-splash" style="background: linear-gradient(306deg, hsl(180,100%,40%), hsl(210,100%,50%))"></div>
+                <div class="process-card">
+                    <div class="step-num">02</div>
+                    <h4>Design Draft</h4>
+                    <p>We build a high-fidelity Figma blueprint of your website's home page and user experience layout for your review.</p>
+                </div>
             </div>
-            <div class="timeline-step">
-                <div class="step-num">03</div>
-                <h4>Clean Coding</h4>
-                <p>Once you approve the design blueprint, we code it using modern tools like Vite, Vanilla CSS, and clean Javascript.</p>
+
+            <div class="process-card-wrapper" data-step-card>
+                <div class="process-splash" style="background: linear-gradient(306deg, hsl(140,100%,40%), hsl(170,100%,45%))"></div>
+                <div class="process-card">
+                    <div class="step-num">03</div>
+                    <h4>Clean Coding</h4>
+                    <p>Once you approve the design blueprint, we code it using modern tools like Vite, Vanilla CSS, and clean Javascript.</p>
+                </div>
             </div>
-            <div class="timeline-step">
-                <div class="step-num">04</div>
-                <h4>Launch & Handover</h4>
-                <p>We deploy your website to your domain, test performance, transfer source code files, and provide instructions.</p>
+
+            <div class="process-card-wrapper" data-step-card>
+                <div class="process-splash" style="background: linear-gradient(306deg, hsl(30,100%,50%), hsl(60,100%,50%))"></div>
+                <div class="process-card">
+                    <div class="step-num">04</div>
+                    <h4>Launch &amp; Handover</h4>
+                    <p>We deploy your website to your domain, test performance, transfer source code files, and provide instructions.</p>
+                </div>
             </div>
+
         </div>
     </section>
 
-    <section id="buy" class="pricing-section anim-fade-up">
-        <div class="pricing-header">
+    <section id="buy" class="pricing-section">
+        <div class="pricing-header" data-scroll-reveal="fade-up">
             <h2>Pick Your Package</h2>
             <p>Choose a style. We build it.</p>
         </div>
@@ -309,8 +326,8 @@
     </section>
 
     <!-- NEW SECTION: RECENT WORKS SLIDER -->
-    <section class="works-section anim-fade-up">
-        <div class="works-header">
+    <section class="works-section">
+        <div class="works-header" data-scroll-reveal="fade-up">
             <h2>Recent Works</h2>
             <p>Slide by slide magic.</p>
         </div>
@@ -328,13 +345,13 @@
     </section>
 
     <!-- FAQ SECTION -->
-    <section class="faq-section anim-fade-up">
-        <div class="faq-header">
+    <section class="faq-section">
+        <div class="faq-header" data-scroll-reveal="fade-up">
             <h2>Got Questions?</h2>
             <p>Here are answers to the most common queries we get.</p>
         </div>
         <div class="faq-container">
-            <div class="faq-item">
+            <div class="faq-item" data-scroll-reveal="fade-up" style="--delay: 0ms">
                 <button class="faq-question">
                     <span>What is a hand-coded website?</span>
                     <i class="fa-solid fa-chevron-down"></i>
@@ -343,7 +360,7 @@
                     <p>It means your site is written line-by-line using pure HTML, CSS, and Javascript. There are no heavy CMS templates (like WordPress or Webflow) or database bloat, giving you unmatched speed, security, and design freedom.</p>
                 </div>
             </div>
-            <div class="faq-item">
+            <div class="faq-item" data-scroll-reveal="fade-up" style="--delay: 80ms">
                 <button class="faq-question">
                     <span>How long does delivery take?</span>
                     <i class="fa-solid fa-chevron-down"></i>
@@ -352,7 +369,7 @@
                     <p>For standard single-page sites, delivery is usually 1 week. Larger corporate packages with up to 5 pages take 1.5 weeks, and custom e-commerce packs take 3 weeks.</p>
                 </div>
             </div>
-            <div class="faq-item">
+            <div class="faq-item" data-scroll-reveal="fade-up" style="--delay: 160ms">
                 <button class="faq-question">
                     <span>Do I own the source code?</span>
                     <i class="fa-solid fa-chevron-down"></i>
@@ -361,7 +378,7 @@
                     <p>Yes, absolutely. Once the project is complete, you own 100% of the files and code. We transfer all assets to your GitHub repository or send them directly to you.</p>
                 </div>
             </div>
-            <div class="faq-item">
+            <div class="faq-item" data-scroll-reveal="fade-up" style="--delay: 240ms">
                 <button class="faq-question">
                     <span>Where will my website be hosted?</span>
                     <i class="fa-solid fa-chevron-down"></i>
@@ -373,7 +390,7 @@
         </div>
     </section>
 
-    <footer class="anim-fade-up">
+    <footer data-scroll-reveal="fade-up">
         <div class="footer-wrapper">
             <div class="footer-brand">
                 <a href="/" class="footer-logo">
@@ -538,6 +555,9 @@
 
     <!-- App Logic -->
     <script type="module" src="app.js"></script>
+
+    <!-- Process Step Card Animations -->
+    <script type="module" src="scroll-cards.js"></script>
 </body>
 
 </html>

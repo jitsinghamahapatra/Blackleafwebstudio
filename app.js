@@ -980,3 +980,42 @@ function setupTrackOrder() {
 }
 
 init();
+
+// ==========================================
+// SCROLL REVEAL — IntersectionObserver
+// ==========================================
+function initScrollReveal() {
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    // Only animate once — stop watching after reveal
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        {
+            threshold: 0.12,   // trigger when 12% of element is visible
+            rootMargin: '0px 0px -40px 0px',  // slight bottom offset for feel
+        }
+    );
+
+    // Observe all elements marked for scroll reveal
+    document.querySelectorAll('[data-scroll-reveal]').forEach((el) => {
+        observer.observe(el);
+    });
+
+    // Watch for dynamically-added package cards (injected after Firebase load)
+    const packagesGrid = document.getElementById('packagesGrid');
+    if (packagesGrid) {
+        const mutationObserver = new MutationObserver(() => {
+            packagesGrid.querySelectorAll('[data-scroll-reveal]:not(.revealed)').forEach((el) => {
+                observer.observe(el);
+            });
+        });
+        mutationObserver.observe(packagesGrid, { childList: true, subtree: true });
+    }
+}
+
+initScrollReveal();

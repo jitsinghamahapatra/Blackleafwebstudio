@@ -1841,3 +1841,152 @@ label {
 .toast-close:hover {
     opacity: 1;
 }
+
+/* ============================= */
+/*    SCROLL REVEAL ANIMATIONS   */
+/* ============================= */
+
+/* Base hidden state — all scroll-reveal elements start invisible */
+[data-scroll-reveal] {
+    opacity: 0;
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transition-duration: 0.75s;
+    transition-delay: var(--delay, 0ms);
+}
+
+/* Revealed state — added by IntersectionObserver */
+[data-scroll-reveal].revealed {
+    opacity: 1;
+    transform: none !important;
+}
+
+/* Fade up (default) */
+[data-scroll-reveal="fade-up"] {
+    transform: translateY(48px);
+}
+
+/* Fade down */
+[data-scroll-reveal="fade-down"] {
+    transform: translateY(-48px);
+}
+
+/* Fade left (slides in from the left) */
+[data-scroll-reveal="fade-left"] {
+    transform: translateX(-60px);
+}
+
+/* Fade right (slides in from the right) */
+[data-scroll-reveal="fade-right"] {
+    transform: translateX(60px);
+}
+
+/* Zoom in */
+[data-scroll-reveal="zoom-in"] {
+    transform: scale(0.88);
+}
+
+/* Zoom + fade up (premium combo) */
+[data-scroll-reveal="zoom-up"] {
+    transform: scale(0.92) translateY(36px);
+}
+
+/* Reduced-motion: just fade, no movement */
+@media (prefers-reduced-motion: reduce) {
+    [data-scroll-reveal] {
+        transform: none !important;
+        transition-duration: 0.3s;
+    }
+}
+
+/* ============================= */
+/*   PROCESS CARD STACK          */
+/* (How it Works — scroll anim)  */
+/* ============================= */
+
+/* Override the old process-section layout */
+.process-section {
+    padding: 80px 20px 40px;
+}
+
+/* Outer stacking container */
+.process-card-stack {
+    margin: 60px auto 0;
+    max-width: 500px;
+    padding-bottom: 100px;
+    width: 100%;
+}
+
+/* Per-step wrapper — stacked with overlap */
+.process-card-wrapper {
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding-top: 20px;
+    margin-bottom: -100px; /* stacking overlap — adjust to taste */
+}
+
+/* Coloured gradient splash (clipPath identical to Motion example) */
+.process-splash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    clip-path: path("M 0 303.5 C 0 292.454 8.995 285.101 20 283.5 L 460 219.5 C 470.085 218.033 480 228.454 480 239.5 L 500 430 C 500 441.046 491.046 450 480 450 L 20 450 C 8.954 450 0 441.046 0 430 Z");
+}
+
+/* The step content card */
+.process-card {
+    width: 300px;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    padding: 36px 30px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow:
+        0 0 1px hsl(0deg 0% 0% / 0.075),
+        0 0 2px hsl(0deg 0% 0% / 0.075),
+        0 0 4px hsl(0deg 0% 0% / 0.075),
+        0 0 8px hsl(0deg 0% 0% / 0.075),
+        0 0 16px hsl(0deg 0% 0% / 0.075);
+    transform-origin: 10% 60%;   /* matches the original */
+    will-change: transform, opacity;
+    position: relative;
+    z-index: 1;
+}
+
+.process-card .step-num {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 3rem;
+    color: var(--ink-blue);
+    line-height: 1;
+}
+
+.process-card h4 {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.4rem;
+    color: var(--ink-blue);
+    line-height: 1.2;
+}
+
+.process-card p {
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: var(--ink-black);
+    opacity: 0.75;
+}
+
+/* Reduced-motion fallback */
+@media (prefers-reduced-motion: reduce) {
+    .process-card {
+        transform: translateY(50px) rotate(-10deg) !important;
+        opacity: 1 !important;
+    }
+}
+
