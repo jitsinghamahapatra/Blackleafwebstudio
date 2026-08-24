@@ -48,37 +48,54 @@ function animateCard(card, direction) {
 }
 
 function init() {
+    // 1. Process Cards Observer
     const wrappers = document.querySelectorAll("[data-step-card]");
-    if (!wrappers.length) return;
+    if (wrappers.length) {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const card = entry.target.querySelector(".process-card");
+                    if (!card) return;
 
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                const card = entry.target.querySelector(".process-card");
-                if (!card) return;
+                    if (entry.isIntersecting) {
+                        animateCard(card, "in");
+                    } else {
+                        animateCard(card, "out");
+                    }
+                });
+            },
+            {
+                // 0.45 fires reliably for these taller text cards
+                threshold: 0.45,
+            }
+        );
 
-                if (entry.isIntersecting) {
-                    animateCard(card, "in");
-                } else {
-                    animateCard(card, "out");
-                }
-            });
-        },
-        {
-            // 0.45 fires reliably for these taller text cards
-            threshold: 0.45,
-        }
-    );
+        wrappers.forEach((wrapper) => {
+            // Set initial hidden state immediately (no flash of visible content)
+            const card = wrapper.querySelector(".process-card");
+            if (card) {
+                card.style.transform = "translateY(300px) rotate(0deg)";
+                card.style.opacity = "0";
+            }
+            observer.observe(wrapper);
+        });
+    }
 
-    wrappers.forEach((wrapper) => {
-        // Set initial hidden state immediately (no flash of visible content)
-        const card = wrapper.querySelector(".process-card");
-        if (card) {
-            card.style.transform = "translateY(300px) rotate(0deg)";
-            card.style.opacity = "0";
-        }
-        observer.observe(wrapper);
-    });
+    // 2. Horizontal Scroll Marquee (useScroll + useTransform in vanilla JS)
+    const marqueeTrack = document.getElementById("scrollMarqueeTrack");
+    if (marqueeTrack) {
+        // Run on scroll
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+            // Moves the track horizontally opposite to vertical scroll (-1 factor)
+            marqueeTrack.style.transform = `translate3d(${-scrollY * 0.4}px, 0, 0)`;
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        // Initial call
+        handleScroll();
+    }
 }
 
 init();
+
