@@ -24,7 +24,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://blackleafwebstudio_db_user:password@cluster0.nimpnyw.mongodb.net/blackleaf';
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkeyforblackleafstudio';
-const ADMIN_EMAIL = 'jitsinghamahapatra2006@gmail.com';
+const ADMIN_EMAIL = 'blackleafwebstudio@gmail.com';
 
 // ES Modules fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
