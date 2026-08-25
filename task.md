@@ -1,12 +1,11 @@
-- [x] Implement backend forgot password endpoint
-  - [x] Add POST `/api/auth/forgot-password` route in `server.js`
-  - [x] Find user by email and normalize/compare registered phone numbers
-  - [x] Hash and update the password
-- [x] Implement frontend reset password modal
-  - [x] Add `initForgotPassword` function in `db-check.js` to dynamically inject and bind the modal
-  - [x] Trigger modal injection on `#forgotPassword` click on any page
-  - [x] Close the auth login modal, collect inputs, and submit to the endpoint
-  - [x] Call `initForgotPassword()` in `hideLoadingScreen()`
-- [/] Verification
-  - [/] Create a local integration test script to verify backend reset logic
-  - [ ] Manually test UI functionality in browser
+- [ ] Implement backend forgot password email link endpoint
+  - [ ] Add `resetPasswordToken` and `resetPasswordExpires` to `User.js`
+  - [ ] Install `nodemailer` package
+  - [ ] Add POST `/api/auth/forgot-password` endpoint to generate token and send email (with console fallback)
+  - [ ] Add POST `/api/auth/reset-password-with-token` to verify token and update password
+- [ ] Implement frontend reset password link detection & modal
+  - [ ] Detect `resetToken` query parameter in `db-check.js` and open "Choose New Password" modal
+  - [ ] Trigger "Forgot Password" to collect email, post to endpoint, and display "check spam folder" message
+- [ ] Verification
+  - [ ] Create script to test token generation and password reset
+  - [ ] Manually verify using the browser

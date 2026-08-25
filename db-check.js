@@ -43,6 +43,9 @@ export function hideLoadingScreen() {
   initForgotPassword();
 }
 
+import { auth } from './firebase-config.js';
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
 export function initForgotPassword() {
   const forgotPasswordLink = document.getElementById('forgotPassword');
   if (!forgotPasswordLink) return;
@@ -50,7 +53,7 @@ export function initForgotPassword() {
   forgotPasswordLink.addEventListener('click', (e) => {
     e.preventDefault();
 
-    // Create/inject modal if not already present
+    // Create/inject "Request Reset Link" modal if not already present
     let modal = document.getElementById('forgotPasswordModal');
     if (!modal) {
       modal = document.createElement('div');
@@ -60,18 +63,15 @@ export function initForgotPassword() {
         <div class="modal-box" style="max-width: 500px; position: relative;">
           <button class="modal-close" id="closeForgotPasswordModal"><i class="fa-solid fa-xmark"></i></button>
           <h2>Reset Password</h2>
-          <p style="margin-bottom: 20px; opacity: 0.8; font-size: 0.9rem; line-height: 1.4; text-align: left;">Verify your email and registered phone number to reset your password.</p>
+          <p style="margin-bottom: 20px; opacity: 0.8; font-size: 0.9rem; line-height: 1.4; text-align: left;">
+            Enter your email address and we'll send you a link to reset your password. 
+            <strong>Please check your spam folder</strong> if you do not receive it in a few minutes.
+          </p>
           <form id="forgotPasswordForm">
             <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.85rem; text-align: left;">Email Address:</label>
-            <input type="email" id="forgotEmail" class="form-input" placeholder="Enter your email" required style="margin-bottom: 15px; width: 100%;">
+            <input type="email" id="forgotEmail" class="form-input" placeholder="Enter your registered email" required style="margin-bottom: 15px; width: 100%;">
             
-            <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.85rem; text-align: left;">Registered Phone Number:</label>
-            <input type="text" id="forgotPhone" class="form-input" placeholder="Enter your phone number" required style="margin-bottom: 15px; width: 100%;">
-            
-            <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.85rem; text-align: left;">New Password:</label>
-            <input type="password" id="forgotNewPassword" class="form-input" placeholder="Enter new password" required style="margin-bottom: 15px; width: 100%;">
-            
-            <button type="submit" id="forgotSubmitBtn" class="btn-request" style="width:100%; margin-top: 10px;">Reset Password</button>
+            <button type="submit" id="forgotSubmitBtn" class="btn-request" style="width:100%; margin-top: 10px;">Send Reset Link</button>
           </form>
         </div>
       `;
@@ -89,53 +89,41 @@ export function initForgotPassword() {
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const email = modal.querySelector('#forgotEmail').value;
-          const phone = modal.querySelector('#forgotPhone').value;
-          const newPassword = modal.querySelector('#forgotNewPassword').value;
 
           const submitBtn = modal.querySelector('#forgotSubmitBtn');
           if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Resetting...';
+            submitBtn.textContent = 'Sending...';
           }
 
           try {
-            const res = await fetch('/api/auth/forgot-password', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, phone, newPassword })
-            });
-            const data = await res.json();
-            if (res.ok && data.success) {
-              if (window.customAlert) {
-                window.customAlert('Password reset successfully! You can now log in.');
-              } else {
-                alert('Password reset successfully! You can now log in.');
-              }
-              modal.classList.remove('active');
-              const authModal = document.getElementById('authModal');
-              if (authModal) authModal.classList.add('active');
-              
-              // Clear fields
-              modal.querySelector('#forgotEmail').value = '';
-              modal.querySelector('#forgotPhone').value = '';
-              modal.querySelector('#forgotNewPassword').value = '';
-            } else {
-              if (window.customAlert) {
-                window.customAlert(data.message || 'Failed to reset password. Please check your inputs.', true);
-              } else {
-                alert(data.message || 'Failed to reset password. Please check your inputs.');
-              }
-            }
-          } catch (err) {
+            await sendPasswordResetEmail(auth, email);
             if (window.customAlert) {
-              window.customAlert('Server connection error. Please try again later.', true);
+              window.customAlert('Password reset link sent! Check your email and check your spam folder.');
             } else {
-              alert('Server connection error. Please try again later.');
+              alert('Password reset link sent! Check your email and check your spam folder.');
+            }
+            modal.classList.remove('active');
+            modal.querySelector('#forgotEmail').value = '';
+          } catch (err) {
+            console.error('Firebase sendPasswordResetEmail error:', err);
+            let errorMsg = 'Failed to send reset link. Please try again.';
+            if (err.code === 'auth/user-not-found') {
+              errorMsg = 'No account found with this email address.';
+            } else if (err.code === 'auth/invalid-email') {
+              errorMsg = 'Please enter a valid email address.';
+            } else if (err.code === 'auth/too-many-requests') {
+              errorMsg = 'Too many requests. Please try again later.';
+            }
+            if (window.customAlert) {
+              window.customAlert(errorMsg, true);
+            } else {
+              alert(errorMsg);
             }
           } finally {
             if (submitBtn) {
               submitBtn.disabled = false;
-              submitBtn.textContent = 'Reset Password';
+              submitBtn.textContent = 'Send Reset Link';
             }
           }
         });

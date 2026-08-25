@@ -207,8 +207,37 @@ app.post('/api/auth/email-login', async (req, res) => {
     }
 
     const isMatch = await user.comparePassword(password);
+
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      // MongoDB password didn't match — try Firebase as a fallback.
+      // This covers the case where the user reset their password via Firebase's
+      // email link, which updates Firebase Auth but not MongoDB.
+      const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
+      if (FIREBASE_API_KEY) {
+        try {
+          const fbRes = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: email.toLowerCase(), password, returnSecureToken: true })
+            }
+          );
+          if (fbRes.ok) {
+            // Firebase accepted the password — sync it to MongoDB
+            user.password = password; // Mongoose pre('save') hook will hash it
+            await user.save();
+            console.log(`[Auth] Synced Firebase password to MongoDB for ${user.email}`);
+          } else {
+            return res.status(400).json({ message: 'Invalid credentials' });
+          }
+        } catch (fbErr) {
+          console.error('Firebase fallback error:', fbErr);
+          return res.status(400).json({ message: 'Invalid credentials' });
+        }
+      } else {
+        return res.status(400).json({ message: 'Invalid credentials' });
+      }
     }
 
     // Auto-promote to admin if email matches ADMIN_EMAIL (fixes existing accounts)
@@ -232,41 +261,6 @@ app.post('/api/auth/email-login', async (req, res) => {
   } catch (err) {
     console.error('Email login error:', err);
     res.status(500).json({ message: 'Server error during login' });
-  }
-});
-
-// Forgot Password / Password Reset (Verify Email + Phone)
-app.post('/api/auth/forgot-password', async (req, res) => {
-  const { email, phone, newPassword } = req.body;
-  if (!email || !phone || !newPassword) {
-    return res.status(400).json({ message: 'Email, phone number, and new password are required' });
-  }
-
-  try {
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(404).json({ message: 'User with this email not found' });
-    }
-
-    // Verify phone number. Normalize digits by stripping non-numeric characters.
-    const normalizedDbPhone = user.phone ? user.phone.replace(/\D/g, '') : '';
-    const normalizedInputPhone = phone ? phone.replace(/\D/g, '') : '';
-
-    const phoneMatches = (normalizedDbPhone && normalizedDbPhone === normalizedInputPhone) || 
-                         (user.phone && user.phone.trim() === phone.trim());
-
-    if (!phoneMatches) {
-      return res.status(400).json({ message: 'Incorrect registered phone number' });
-    }
-
-    // Update password (Mongoose pre('save') hook will hash it automatically)
-    user.password = newPassword;
-    await user.save();
-
-    res.json({ success: true, message: 'Password reset successfully' });
-  } catch (err) {
-    console.error('Forgot password error:', err);
-    res.status(500).json({ message: 'Server error during password reset' });
   }
 });
 
