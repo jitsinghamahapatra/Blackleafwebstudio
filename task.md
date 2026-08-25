@@ -1,8 +1,9 @@
-- [x] Update `server.js` with unread messages count roles check & `PUT /api/messages/read-all` endpoint
-- [x] Update `contact.html` with dynamic detail element IDs, phone number slot, and map container
-- [x] Update `contact.js` to fetch and load contact-info details dynamically (toggling map/phone display)
-- [x] Update `admin.html` with contact fields form sections and dropdown select option
-- [x] Update `admin.js` to toggle and save contact-info fields dynamically
-- [x] Implement `.toast-notification` glassmorphic CSS styling in `style.css`
-- [x] Implement `checkMessageNotifications()` and Toast UI builder in `app.js` on homepage load
-- [x] Run `npm run build` to verify the code compilation
+- [x] Install `ogl` dependency
+- [x] Create `src/components/CircularGallery.jsx`
+- [x] Create `src/components/CircularGallery.css`
+- [x] Create `src/work-gallery.jsx` React entry point
+- [x] Modify `work.html` to load React gallery
+- [x] Modify `work.js` to comment out unused vanilla projects loader
+- [x] Modify `style.css` to add dashed borders on nav and hero
+- [x] Modify `spider-canvas.js` to add bottom line particles and scale them on resize
+- [x] Build and verify compilation

@@ -71,6 +71,7 @@ nav {
     align-items: center;
     position: relative;
     z-index: 100;
+    border-bottom: 3px dashed var(--ink-blue);
 }
 
 .nav-logo a {
@@ -196,6 +197,7 @@ nav {
     align-items: center;
     position: relative;
     overflow: hidden;
+    border-bottom: 3px dashed var(--ink-blue);
 }
 
 .hero-content {

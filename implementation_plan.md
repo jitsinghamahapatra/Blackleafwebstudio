@@ -1,62 +1,55 @@
-# Implementation Plan - Editable Contact Info, Map integration, & Homepage Message Notifications
+# Implementation Plan - CircularGallery Integration & Spider Line Interactions
 
-We will make the contact page details (email, phone, address, and map iframe) fully editable in the Admin panel, integrate a styled Map section on the Contact page, and build a glassmorphic toast notification on the homepage for new unread messages that disappears after being seen.
+We will integrate the React Bits `<CircularGallery />` component into the work/portfolio page (`work.html`), replacing the static projects grid. Additionally, we will add matching dashed borders to the bottom of the navbar and the bottom of the hero section, and update `spider-canvas.js` to allow the spider to land and stand on the new bottom dashed border.
 
 ## Proposed Changes
 
-### 1. Database & Server (server.js)
-#### [MODIFY] [`server.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server.js)
-- Update `GET /api/messages/unread-count` to check user roles:
-  - If admin: return count of all messages where `readByAdmin: false`.
-  - If user: return count of user's messages where `readByUser: false`.
-- Add `PUT /api/messages/read-all` endpoint to mark all unread messages as read for the logged-in user or admin.
+### 1. Project Dependencies
+- Install the `ogl` library required by `CircularGallery`.
+  - Command: `npm install ogl`
 
-### 2. Contact Page Integration
-#### [MODIFY] [`contact.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.html)
-- Add IDs `contact-email`, `contact-phone`, and `contact-address` to the contact details column.
-- Insert a hidden phone item container (`#contact-phone-container`) that displays when a phone number is set.
-- Insert a map container (`#contact-map-container`) with a Google Maps iframe (`#contact-map`) below the main contact forms grid.
+### 2. CircularGallery React Component
+#### [NEW] [CircularGallery.jsx](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/src/components/CircularGallery.jsx)
+- Implement the `<CircularGallery />` WebGL carousel component.
+- Add mouse click/touch tap detection that maps viewport coordinates to check plane intersections, allowing users to click/tap a card to open its respective project link in a new tab.
+- Modify event listeners to bind `wheel` and `mousedown`/`touchstart` to the gallery container instead of `window`. This allows normal vertical scrolling on other parts of the page, while scrolling inside the gallery controls it horizontally.
 
-#### [MODIFY] [`contact.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/contact.js)
-- Add a `loadContactInfo()` function to fetch `contact-info` Content from the backend.
-- Dynamically populate email text, phone number (toggling container visibility), address, and the map iframe src.
-- Trigger `loadContactInfo()` concurrently inside `init()` alongside the page intro loader.
+#### [NEW] [CircularGallery.css](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/src/components/CircularGallery.css)
+- Implement the styles for the gallery wrapper and hover states.
 
-### 3. Admin Content Editors
-#### [MODIFY] [`admin.html`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.html)
-- Add a new option `<option value="contact-info">Contact Details (Email, Phone, Address, Map)</option>` to the page selector dropdown.
-- Group the standard title/content forms inside a wrapper div (`#standardPageFields`).
-- Add a new inputs wrapper div (`#contactInfoFields`) containing form fields for Contact Email, Contact Phone, Contact Address, and Google Maps Embed URL.
+### 3. Work Gallery Integration
+#### [NEW] [work-gallery.jsx](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/src/work-gallery.jsx)
+- Create a React entry point that fetches projects from `/api/projects`.
+- Implement category filters (`all`, `landing`, `corporate`, `ecommerce`) with the styling from `style.css`.
+- Render the `<CircularGallery />` populated with the filtered projects.
 
-#### [MODIFY] [`admin.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/admin.js)
-- Handle selection of the `contact-info` key:
-  - Hide standard textfields and show custom contact textfields.
-  - Disable standard validation required properties.
-- Update page content loading and save handlers to populate and submit email/phone/address/map URL values under the single `contact-info` DB key mapping.
+#### [MODIFY] [work.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/work.html)
+- Replace the static HTML filter buttons and projects grid with `<div id="work-gallery-root"></div>`.
+- Include `<script type="module" src="/src/work-gallery.jsx"></script>` to mount the React gallery.
 
-### 4. Homepage Message Notifications
-#### [MODIFY] [`style.css`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css)
-- Implement CSS classes for `.toast-notification` with glassmorphic styling (`backdrop-filter: blur(10px)`), borders, entrance slide-up/fade-in, and dismissal exit animations.
+#### [MODIFY] [work.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/work.js)
+- Comment out the call to `loadProjects()` in `init()`, as projects are now fetched and rendered by the React component.
 
-#### [MODIFY] [`app.js`](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/app.js)
-- Add a `checkMessageNotifications()` function that queries `/api/messages/unread-count` if a user is authenticated.
-- If `unreadCount > 0`, create a floating glassmorphic toast notification component at the bottom-right of the screen after 1.5 seconds delay.
-- Display custom text:
-  - Admin: "You have X new messages from clients."
-  - User: "You have X new replies on your threads."
-- Wire click handlers for the CTA link (redirecting to admin/profile) and close button. Both actions trigger `PUT /api/messages/read-all` so the notifications disappear permanently until new messages are received.
+### 4. Dashed Lines Style & Spider Interaction
+#### [MODIFY] [style.css](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css)
+- Add `border-bottom: 3px dashed var(--ink-blue);` to the `nav` selector.
+- Add `border-bottom: 3px dashed var(--ink-blue);` to the `.hero` selector.
+
+#### [MODIFY] [spider-canvas.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/spider-canvas.js)
+- Add a row of pinned particles along the bottom of the canvas (`y = height - 12`) to the `spiderweb` composite.
+- Adjust the `resize` listener to dynamically reposition the bottom pinned particles when the viewport size changes.
+- Update `spiderweb.drawParticles` to skip drawing dots for the bottom physics line particles, keeping them invisible.
+- The spider will now automatically find the bottom pinned particles and attach its legs to them when dragged or crawling near the bottom, landing perfectly on the dashed border line.
 
 ---
 
 ## Verification Plan
 
 ### Automated Verification
-- Run `npm run build` to confirm compiling is successful.
+- Run `npm run build` to verify the React bundles and CSS compile without errors.
 
 ### Manual Verification
-- **Admin Edit Contact Details**: Go to the Admin dashboard, edit Contact details under the selector tab, save, and confirm changes show up on the Contact page immediately.
-- **Contact Map**: Verify the Google Map iframe is shown on `contact.html` with the custom admin-configured link.
-- **Unread Notification**:
-  - Send a message from contact page as guest.
-  - Log in as admin, check if a notification toast appears on the homepage saying "You have 1 new messages from clients."
-  - Dismiss/close the toast, reload the page, and verify the notification does not show again.
+- **Dashed Lines**: Verify that a dashed line appears at the bottom of the navbar and at the bottom of the hero section.
+- **Spider Interaction**: Open the homepage, drag the spider to the bottom border line, and verify that it lands and stands on the dashed line with its legs attached. Resize the screen and verify the line and spider behavior scale correctly.
+- **CircularGallery**: Open the recent works page (`work.html`), verify the projects load in a 3D curved gallery, scroll it using mouse wheel/drag, filter by categories, and click a project card to verify it opens the project link in a new tab.
+
