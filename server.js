@@ -235,6 +235,41 @@ app.post('/api/auth/email-login', async (req, res) => {
   }
 });
 
+// Forgot Password / Password Reset (Verify Email + Phone)
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email, phone, newPassword } = req.body;
+  if (!email || !phone || !newPassword) {
+    return res.status(400).json({ message: 'Email, phone number, and new password are required' });
+  }
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: 'User with this email not found' });
+    }
+
+    // Verify phone number. Normalize digits by stripping non-numeric characters.
+    const normalizedDbPhone = user.phone ? user.phone.replace(/\D/g, '') : '';
+    const normalizedInputPhone = phone ? phone.replace(/\D/g, '') : '';
+
+    const phoneMatches = (normalizedDbPhone && normalizedDbPhone === normalizedInputPhone) || 
+                         (user.phone && user.phone.trim() === phone.trim());
+
+    if (!phoneMatches) {
+      return res.status(400).json({ message: 'Incorrect registered phone number' });
+    }
+
+    // Update password (Mongoose pre('save') hook will hash it automatically)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ success: true, message: 'Password reset successfully' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ message: 'Server error during password reset' });
+  }
+});
+
 // Update Profile
 app.post('/api/auth/update-profile', auth, async (req, res) => {
   const { name, phone, password, email } = req.body;

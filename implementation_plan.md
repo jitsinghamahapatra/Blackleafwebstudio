@@ -1,55 +1,50 @@
-# Implementation Plan - CircularGallery Integration & Spider Line Interactions
+# Implementation Plan - Forgot Password Flow
 
-We will integrate the React Bits `<CircularGallery />` component into the work/portfolio page (`work.html`), replacing the static projects grid. Additionally, we will add matching dashed borders to the bottom of the navbar and the bottom of the hero section, and update `spider-canvas.js` to allow the spider to land and stand on the new bottom dashed border.
+We will implement the forgot password functionality for Blackleaf Studio. Because no SMTP or third-party SMS gateway is configured in the environment variables, we will use a secure, self-contained method: verifying both the user's **Email Address** and **Registered Phone Number** to reset their password.
+
+## User Review Required
+
+> [!NOTE]
+> Since we do not have an active SMTP server configured, password resets will be verified against the registered **Email Address** and **Phone Number** combination in the database.
 
 ## Proposed Changes
 
-### 1. Project Dependencies
-- Install the `ogl` library required by `CircularGallery`.
-  - Command: `npm install ogl`
+---
 
-### 2. CircularGallery React Component
-#### [NEW] [CircularGallery.jsx](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/src/components/CircularGallery.jsx)
-- Implement the `<CircularGallery />` WebGL carousel component.
-- Add mouse click/touch tap detection that maps viewport coordinates to check plane intersections, allowing users to click/tap a card to open its respective project link in a new tab.
-- Modify event listeners to bind `wheel` and `mousedown`/`touchstart` to the gallery container instead of `window`. This allows normal vertical scrolling on other parts of the page, while scrolling inside the gallery controls it horizontally.
+### Backend Components
 
-#### [NEW] [CircularGallery.css](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/src/components/CircularGallery.css)
-- Implement the styles for the gallery wrapper and hover states.
+#### [MODIFY] [server.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/server.js)
+- Add a new POST route at `/api/auth/forgot-password` that:
+  - Accepts `email`, `phone`, and `newPassword`.
+  - Searches for the user by `email`.
+  - Normalizes and compares the input phone number with the registered user's phone number to verify identity.
+  - Hashes the `newPassword` and saves it.
 
-### 3. Work Gallery Integration
-#### [NEW] [work-gallery.jsx](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/src/work-gallery.jsx)
-- Create a React entry point that fetches projects from `/api/projects`.
-- Implement category filters (`all`, `landing`, `corporate`, `ecommerce`) with the styling from `style.css`.
-- Render the `<CircularGallery />` populated with the filtered projects.
+---
 
-#### [MODIFY] [work.html](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/work.html)
-- Replace the static HTML filter buttons and projects grid with `<div id="work-gallery-root"></div>`.
-- Include `<script type="module" src="/src/work-gallery.jsx"></script>` to mount the React gallery.
+### Frontend Components
 
-#### [MODIFY] [work.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/work.js)
-- Comment out the call to `loadProjects()` in `init()`, as projects are now fetched and rendered by the React component.
-
-### 4. Dashed Lines Style & Spider Interaction
-#### [MODIFY] [style.css](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/style.css)
-- Add `border-bottom: 3px dashed var(--ink-blue);` to the `nav` selector.
-- Add `border-bottom: 3px dashed var(--ink-blue);` to the `.hero` selector.
-
-#### [MODIFY] [spider-canvas.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/spider-canvas.js)
-- Add a row of pinned particles along the bottom of the canvas (`y = height - 12`) to the `spiderweb` composite.
-- Adjust the `resize` listener to dynamically reposition the bottom pinned particles when the viewport size changes.
-- Update `spiderweb.drawParticles` to skip drawing dots for the bottom physics line particles, keeping them invisible.
-- The spider will now automatically find the bottom pinned particles and attach its legs to them when dragged or crawling near the bottom, landing perfectly on the dashed border line.
+#### [MODIFY] [db-check.js](file:///c:/Users/jitsi/OneDrive/Desktop/Programming/Z+%20Projects/blackleaf%20studio/db-check.js)
+- Implement an `initForgotPassword` function that dynamically binds to `#forgotPassword` links on any page.
+- On click, it will:
+  - Dynamically inject a styled "Reset Password" modal overlay/box into the DOM if it doesn't already exist.
+  - Auto-close the login modal.
+  - Present fields for: Email, Registered Phone Number, and New Password.
+  - Submit the inputs to the `/api/auth/forgot-password` endpoint.
+  - Show success/error toasts using the existing `window.customAlert` helper and transition back to the login modal on success.
+- Call `initForgotPassword()` at the end of the `hideLoadingScreen()` function to ensure it automatically initializes on all client pages.
 
 ---
 
 ## Verification Plan
 
-### Automated Verification
-- Run `npm run build` to verify the React bundles and CSS compile without errors.
+### Automated Tests
+- Create a lightweight test script `scratch/test-reset.js` using `node` to verify the reset logic against a local/test database.
 
 ### Manual Verification
-- **Dashed Lines**: Verify that a dashed line appears at the bottom of the navbar and at the bottom of the hero section.
-- **Spider Interaction**: Open the homepage, drag the spider to the bottom border line, and verify that it lands and stands on the dashed line with its legs attached. Resize the screen and verify the line and spider behavior scale correctly.
-- **CircularGallery**: Open the recent works page (`work.html`), verify the projects load in a 3D curved gallery, scroll it using mouse wheel/drag, filter by categories, and click a project card to verify it opens the project link in a new tab.
-
+1. Open the homepage or any other page.
+2. Trigger the login modal and click the **Forgot Password?** link.
+3. Verify that the "Reset Password" modal is dynamically injected and displays correctly.
+4. Try submitting an incorrect phone number or non-existent email (should show error toast).
+5. Input the correct registered email and phone number, and type a new password. Submit to reset.
+6. Verify the login modal is displayed again, and attempt logging in with the new password.

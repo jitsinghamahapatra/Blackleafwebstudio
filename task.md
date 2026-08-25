@@ -1,9 +1,12 @@
-- [x] Install `ogl` dependency
-- [x] Create `src/components/CircularGallery.jsx`
-- [x] Create `src/components/CircularGallery.css`
-- [x] Create `src/work-gallery.jsx` React entry point
-- [x] Modify `work.html` to load React gallery
-- [x] Modify `work.js` to comment out unused vanilla projects loader
-- [x] Modify `style.css` to add dashed borders on nav and hero
-- [x] Modify `spider-canvas.js` to add bottom line particles and scale them on resize
-- [x] Build and verify compilation
+- [x] Implement backend forgot password endpoint
+  - [x] Add POST `/api/auth/forgot-password` route in `server.js`
+  - [x] Find user by email and normalize/compare registered phone numbers
+  - [x] Hash and update the password
+- [x] Implement frontend reset password modal
+  - [x] Add `initForgotPassword` function in `db-check.js` to dynamically inject and bind the modal
+  - [x] Trigger modal injection on `#forgotPassword` click on any page
+  - [x] Close the auth login modal, collect inputs, and submit to the endpoint
+  - [x] Call `initForgotPassword()` in `hideLoadingScreen()`
+- [/] Verification
+  - [/] Create a local integration test script to verify backend reset logic
+  - [ ] Manually test UI functionality in browser
